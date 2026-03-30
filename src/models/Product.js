@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DB_MODELS } from "../utils/enums";
+import { DB_MODELS } from "../utils/enums.js";
 
 const productShema = new mongoose.Schema({
     title: {

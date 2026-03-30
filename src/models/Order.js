@@ -1,5 +1,5 @@
 import mongoose, { mongo, Mongoose } from "mongoose";
-import { DB_MODELS, ORDER_STATUS_TYPES_LIST, ORDER_STATUS_TYPES } from "../utils/enums";
+import { DB_MODELS, ORDER_STATUS_TYPES_LIST, ORDER_STATUS_TYPES } from "../utils/enums.js";
 
 const orderItemSchema = new mongoose.Schema({
     product: {
