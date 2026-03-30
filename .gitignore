@@ -1,1 +1,8 @@
+# modules
 node_modules/
+
+# envirements
+.env
+.env.*.local
+.env.loacal
+
