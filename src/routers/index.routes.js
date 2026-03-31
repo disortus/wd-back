@@ -2,6 +2,7 @@ import { Router } from "express";
 import authRouter from "./auth.routes.js";
 import categoryRouter from "./category.routes.js";
 import productRouter from "./product.routes.js";
+import healthRouter from "./health.routes.js";
 
 const router = Router();
 
@@ -29,6 +30,9 @@ router.use("/categories", categoryRouter);
 
 // Products routes
 router.use("/products", productRouter);
+
+// Health routes
+router.use("/health", healthRouter);
 
 // TODO: add other routes
 
