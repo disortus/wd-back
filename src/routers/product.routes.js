@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { cretaeProductValidator, updateProductValidator, queryProductsValidator, idParamValidator } from "../validators/product.validator.js"
 import { cretaeProduct, updateProduct, deleteProduct, getProducts, getProductBySlug } from "../controllers/product.controller.js";
-import { USER_ROLE_TYPES } from "../utils/enums";
+import { USER_ROLE_TYPES } from "../utils/enums.js";
 import { validate } from "../middleware/validation.middleware.js";
 import { reqireAuth } from "../middleware/auth.middleware.js";
 import { allowRoles } from "../middleware/role.middleware.js";

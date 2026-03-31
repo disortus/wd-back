@@ -1,10 +1,10 @@
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
-import router from "./routers/index.routes.js";
 import morgan from "morgan";
 import compression from "compression";
 import swaggerUi from "swagger-ui-express";
+import router from "./routers/index.routes.js";
 import { swaggerSpec } from "../docs/swagger.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 import { globalRateLimit } from "./middleware/rate-limit.middleware.js";

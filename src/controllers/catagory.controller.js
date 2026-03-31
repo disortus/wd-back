@@ -1,6 +1,5 @@
 import slugify from "slugify";
 import Category from "../models/Category.js";
-import slugify from "slugify";
 import { AppError } from "../utils/app-errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 

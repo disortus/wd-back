@@ -36,7 +36,7 @@ router.use("/products", productRouter);
 router.use("/health", healthRouter);
 
 // Public routes
-router.use("/public", productRouter);
+router.use("/public", publicRouter);
 
 // TODO: add other routes
 
