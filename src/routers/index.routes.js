@@ -3,6 +3,7 @@ import authRouter from "./auth.routes.js";
 import categoryRouter from "./category.routes.js";
 import productRouter from "./product.routes.js";
 import healthRouter from "./health.routes.js";
+import publicRouter from "./public.routes.js";
 
 const router = Router();
 
@@ -33,6 +34,9 @@ router.use("/products", productRouter);
 
 // Health routes
 router.use("/health", healthRouter);
+
+// Public routes
+router.use("/public", productRouter);
 
 // TODO: add other routes
 
