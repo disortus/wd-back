@@ -1,8 +1,10 @@
 import slugify from "slugify";
 import Category from "../models/Category.js";
 import slugify from "slugify";
+import { AppError } from "../utils/app-errors.js";
+import { asyncHandler } from "../utils/async-handler.js";
 
-export async function cretaeCategory(req, res) {
+export const cretaeCategory = asyncHandler(async (req, res) => {
     try {
         const { name, image } = req.body;
 
@@ -11,9 +13,7 @@ export async function cretaeCategory(req, res) {
         const exists = await Category.findOne({ name });
 
         if (exists) {
-            res.status(400).json({
-                message: "category already exists"
-            });
+            throw new AppError(400, "category already exists");
         }
 
         const category = Category.create({
@@ -34,35 +34,35 @@ export async function cretaeCategory(req, res) {
             message: "cretate category error"
         });
     }
-}
+});
 
-export async function getCategories(req, res) {
+export const getCategories = asyncHandler(async (req, res) => {
     const categories = await Category.find().sort({ cretaedAt: -1 });
+    
+    if (!categories) {
+        throw new AppError(404, "categories not found");
+    }
 
     res.json(categories);
-}
+});
 
-export async function getCategoryById(req, res) {
+export const getCategoryById = asyncHandler(async (req, res) => {
     const catagory = await Category.findById(req.params.id);
 
     if (!catagory) {
-        return res.status(404).json({
-            message: "category not found"
-        });
+        throw new AppError(404, "category not found");
     }
 
     res.json(catagory);
-}
+});
 
-export async function updateCategory(req, res) {
+export const updateCategory = asyncHandler(async (req, res) => {
     try {
         const category = await Category.findByIdAndUpdate(req.params.id, req.body,
             { new: true, runValidators: true });
         
         if (!category) {
-            return res.status(404).json({
-                message: "category not found"
-            });
+            throw new AppError(404, "category not found");
         }
     } catch (error) {
         return res.status(500).json({
@@ -70,16 +70,14 @@ export async function updateCategory(req, res) {
             message: "category update error"
         });
     }
-}
+});
 
-export async function deleteCategory(req, res) {
+export const deleteCategory = asyncHandler(async (req, res) => {
     try {
         const category = await Category.findByIdAndDelete(req.params.id);
 
         if (!category) {
-            return res.status(404).json({
-                message: "category not found"
-            });
+            throw new AppError(404, "category not found");
         }
 
         res.json({
@@ -93,4 +91,4 @@ export async function deleteCategory(req, res) {
             message: "category delete error"
         });
     }
-}
+});

@@ -6,8 +6,7 @@ import morgan from "morgan";
 import compression from "compression";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "../docs/swagger.js";
-import { errorHandler } from "./middleware/error.middleware.js";
-import { notFound } from "./middleware/notFound.middleware.js";
+import { errorHandler, notFound } from "./middleware/error.middleware.js";
 import { globalRateLimit } from "./middleware/rate-limit.middleware.js";
 
 const app = express();
@@ -34,12 +33,12 @@ app.use(compression());
 // All routes
 app.use("/api", router);
 
-// Global error handlers
-app.use(errorHandler);
-app.use(notFound);
-
 // Swagger docs
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Global error handlers
+app.use(notFound);
+app.use(errorHandler);
 
 // Home page
 app.get("/", (req, res) => {

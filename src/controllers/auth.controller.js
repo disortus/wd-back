@@ -2,17 +2,17 @@ import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { generateAccessToken } from "../utils/jwt.js";
 import { USER_ROLE_TYPES } from "../utils/enums.js";
+import { AppError } from "../utils/app-errors.js";
+import { asyncHandler } from "../utils/async-handler.js";
 
-export async function register(req, res) {
+export const register = asyncHandler(async (req, res) => {
     try {
         const { fullname, email, password, phone } = req.body;
 
         const exists = await User.findOne({ email });
 
         if (exists) {
-            return res.status(400).json({
-                message: "email already registered",
-            });
+            throw new AppError(400, "email already exists");
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -44,26 +44,22 @@ export async function register(req, res) {
             message: "registration error",
         });
     }
-}
+});
 
-export async function login(req, res) {
+export const login = asyncHandler(async (req, res) => {
     try {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(400).json({
-                message: "invalid credentails"
-            });
+            throw new AppError(400, "invalid credentails");
         }
 
         const isMatch = await bcrypt.compare(password, user.passwordHash);
 
         if (!isMatch) {
-            return res.status(400).json({
-                message: "invalid credentails"
-            });
+            throw new AppError(400, "invalid email or password");
         }
 
         const token = generateAccessToken(user);
@@ -84,7 +80,7 @@ export async function login(req, res) {
             message: "login error"
         });
     }
-}
+});
 
 export async function getMe(req, res) {
     try {

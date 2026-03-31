@@ -38,6 +38,7 @@ export const ERROR_TYPES = {
     UNAUTHORIZED_ERROR: "UnauthorizedError",
     NOT_FOUND_ERROR: "NotFoundError",
     CAST_ERROR: "CastError",
+    APP_ERROR: "AppError",
     INTERNAL_SERVER_ERROR: "InternalServerError"
 };
 

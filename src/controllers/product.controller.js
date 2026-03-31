@@ -1,15 +1,15 @@
 import slugify from "slugify";
 import Product from "../models/Product.js";
+import { AppError } from "../utils/app-errors.js";
+import { asyncHandler } from "../utils/async-handler.js";
 
-export async function cretaeProduct(req, res) {
+export const cretaeProduct = asyncHandler(async (req, res) => {
     const slug = slugify(req.body.title, { lower: true, strict: true });
 
     const exists = await Product.findOne({ slug });
 
     if (exists) {
-        return res.status(400).json({
-            message: "product already exists"
-        });
+        throw new AppError(400, "product already exists");
     }
 
     const product = await Product.create({
@@ -21,9 +21,9 @@ export async function cretaeProduct(req, res) {
         ok: true,
         product
     });
-}
+});
 
-export async function updateProduct(req, res) {
+export const updateProduct = asyncHandler(async (req, res) => {
     if (req.body.title) {
         req.body.slug = slugify(req.body.title, { lower: true, strict: true });
     }
@@ -31,31 +31,27 @@ export async function updateProduct(req, res) {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true});
 
     if (!product) {
-        return res.status(404).json({
-            message: "product not found"
-        });
+        throw new AppError(404, "product not found");
     }
 
     res.json({
         ok: true,
         product
     });
-}
+});
 
-export async function deleteProduct(req, res) {
+export const deleteProduct = asyncHandler(async (req, res) => {
     const product = await Product.findByIdAndDelete(req.params.id);
 
     if (!product) {
-        return res.status(404).json({
-            message: "product not found"
-        });
+        throw new AppError(404, "product not found");
     }
 
     res.json({
         ok: true,
         message: "product deleted"
     });
-}
+});
 
 export async function getProducts(req, res) {
     const { category, minPrice, maxPrice, page=1, limit=10, search} = req.query;
@@ -105,14 +101,12 @@ export async function getProducts(req, res) {
     });
 }
 
-export async function getProductBySlug(req, res) {
+export const getProductBySlug = asyncHandler(async (req, res) => {
     const product = await Product.findOne({ slug: req.params.slug }).populate("category_id");
 
     if (!product) {
-        return res.status(404).json({
-            message: "product not found"
-        });
+        throw new AppError(404, "product not found");
     }
 
     res.json(product);
-}
+});
