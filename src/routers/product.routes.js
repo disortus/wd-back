@@ -25,3 +25,51 @@ router.delete("/admin/:id", reqireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), idPar
 
 export default router;
 
+/**
+ * @swagger
+ * tags:
+ *   name: Products
+ *   description: Product endpoints
+ */
+
+
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     summary: get products list
+ *     tags: [Products]
+ *
+ *     parameters:
+ *
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *
+ *     responses:
+ *
+ *       200:
+ *         description: list of products
+ *
+ *         content:
+ *           application/json:
+ *
+ *             schema:
+ *               $ref: '#/components/schemas/ProductListResponse'
+ */

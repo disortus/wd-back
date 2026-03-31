@@ -17,27 +17,45 @@ export default router;
 
 /**
  * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication endpoints
+ */
+
+
+/**
+ * @swagger
  * /auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: register new user
  *     tags: [Auth]
+ *
  *     requestBody:
  *       required: true
+ *
  *       content:
  *         application/json:
+ *
  *           schema:
  *             $ref: '#/components/schemas/RegisterRequest'
+ *
  *     responses:
+ *
  *       201:
- *         description: User registered successfully
+ *         description: success
+ *
  *         content:
  *           application/json:
+ *
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
+ *
  *       400:
- *         description: Validation error
+ *         description: validation error
+ *
  *         content:
  *           application/json:
+ *
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ValidationErrorResponse'
  */

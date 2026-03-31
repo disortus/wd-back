@@ -17,3 +17,18 @@ router.use("/products", productRouter);
 // TODO: add other routes
 
 export default router;
+
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: create category
+ *     tags: [Categories]
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       201:
+ *         description: category created
+ */

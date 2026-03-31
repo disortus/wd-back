@@ -24,3 +24,45 @@ router.patch("/admin/:id", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), updat
 router.delete("/admin/:id", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), idParamValidator, validate, deleteCategory);
 
 export default router;
+
+/**
+ * @swagger
+ * tags:
+ *   name: Categories
+ *   description: Category endpoints
+ */
+
+
+/**
+ * @swagger
+ * /categories:
+ *   get:
+ *     summary: get all categories
+ *     tags: [Categories]
+ *
+ *     responses:
+ *
+ *       200:
+ *         description: list of categories
+ *
+ *         content:
+ *           application/json:
+ *
+ *             schema:
+ *               $ref: '#/components/schemas/CategoryListResponse'
+ */
+
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: create category
+ *     tags: [Categories]
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       201:
+ *         description: category created
+ */

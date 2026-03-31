@@ -46,3 +46,18 @@ app.get("/", (req, res) => {
 });
 
 export default app
+
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: create category
+ *     tags: [Categories]
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       201:
+ *         description: category created
+ */

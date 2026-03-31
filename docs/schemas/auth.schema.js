@@ -2,6 +2,7 @@
  * @swagger
  * components:
  *   schemas:
+ *
  *     RegisterRequest:
  *       type: object
  *       required:
@@ -12,15 +13,19 @@
  *         fullName:
  *           type: string
  *           example: Ivan Ivanov
+ *
  *         email:
  *           type: string
  *           example: test@mail.com
+ *
  *         password:
  *           type: string
  *           example: 123456
+ *
  *         phone:
  *           type: string
  *           example: +77001234567
+ *
  *
  *     LoginRequest:
  *       type: object
@@ -31,22 +36,26 @@
  *         email:
  *           type: string
  *           example: test@mail.com
+ *
  *         password:
  *           type: string
  *           example: 123456
+ *
  *
  *     AuthResponse:
  *       type: object
  *       properties:
  *         success:
  *           type: boolean
- *           example: true
+ *
  *         data:
  *           type: object
  *           properties:
+ *
  *             user:
  *               $ref: '#/components/schemas/User'
+ *
  *             token:
  *               type: string
- *               example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *               example: jwt_token_here
  */
