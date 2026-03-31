@@ -2,6 +2,8 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import router from "./routers/index.routes.js";
+import morgan from "morgan";
+import compression from "compression";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "../docs/swagger.js";
 import { errorHandler } from "./middleware/error.middleware.js";
@@ -22,6 +24,12 @@ app.use(express.json());
 // Security
 app.use(helmet());
 app.use(globalRateLimit);
+
+// HTTP requests logger
+app.use(morgan("dev"));
+
+// Response compression
+app.use(compression());
 
 // All routes
 app.use("/api", router);
