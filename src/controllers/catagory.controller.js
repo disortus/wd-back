@@ -1,8 +1,12 @@
+import slugify from "slugify";
 import Category from "../models/Category.js";
+import slugify from "slugify";
 
 export async function cretaeCategory(req, res) {
     try {
-        const { name, slug, image } = req.body;
+        const { name, image } = req.body;
+
+        const slug = slugify(req.body.name, { lower: true, strict: true });
 
         const exists = await Category.findOne({ name });
 

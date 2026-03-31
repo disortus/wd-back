@@ -7,6 +7,13 @@ const productShema = new mongoose.Schema({
         required: true
     },
 
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true
+    },
+
     description: {
         type: String
     },
@@ -23,11 +30,16 @@ const productShema = new mongoose.Schema({
 
     category_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: DB_MODELS.CATEGORY
+        ref: DB_MODELS.CATEGORY,
+        required: true
     },
 
     image: {
         type: [String]
+    },
+
+    specs: {
+        type: Object
     },
 
     isActive: {

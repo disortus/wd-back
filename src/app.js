@@ -6,7 +6,7 @@ import { notFound } from "./middleware/notFound.middleware.js";
 
 const app = express();
 
-// cors
+// CORS
 app.use(cors({
     origin: "*",
     credentials: true
@@ -22,7 +22,7 @@ app.use("/api", router);
 app.use(errorHandler);
 app.use(notFound);
 
-// home page
+// Home page
 app.get("/", (req, res) => {
     res.end("home page 🏡");
 });

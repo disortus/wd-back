@@ -13,6 +13,7 @@ router.get("/", getCategory);
 
 router.get("/:id", idParamValidator, validate, getCategoryById);
 
+// ADMIN routes
 // POSTs
 router.post("/admin", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), createCategoryValidator, validate, cretaeCategory);
 
