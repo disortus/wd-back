@@ -37,6 +37,7 @@ export const ERROR_TYPES = {
     VALIDATION_ERROR: "ValidationError",
     UNAUTHORIZED_ERROR: "UnauthorizedError",
     NOT_FOUND_ERROR: "NotFoundError",
+    CAST_ERROR: "CastError",
     INTERNAL_SERVER_ERROR: "InternalServerError"
 };
 
