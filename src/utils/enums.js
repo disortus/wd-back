@@ -31,3 +31,13 @@ export const ORDER_STATUS_TYPES = {
 };
 
 export const ORDER_STATUS_TYPES_LIST = Object.values(ORDER_STATUS_TYPES);
+
+// Errors types enum
+export const ERROR_TYPES = {
+    VALIDATION_ERROR: "ValidationError",
+    UNAUTHORIZED_ERROR: "UnauthorizedError",
+    NOT_FOUND_ERROR: "NotFoundError",
+    INTERNAL_SERVER_ERROR: "InternalServerError"
+};
+
+export const ERROR_TYPES_LIST = Object.values(ERROR_TYPES);
