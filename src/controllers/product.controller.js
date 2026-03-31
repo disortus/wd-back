@@ -53,7 +53,7 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     });
 });
 
-export async function getProducts(req, res) {
+export const getProducts = asyncHandler(async (req, res) => {
     const { category, minPrice, maxPrice, page=1, limit=10, search} = req.query;
 
     const filter = { isActive: true };
@@ -99,7 +99,7 @@ export async function getProducts(req, res) {
         page,
         pages: Math.ceil(total / limit)
     });
-}
+});
 
 export const getProductBySlug = asyncHandler(async (req, res) => {
     const product = await Product.findOne({ slug: req.params.slug }).populate("category_id");

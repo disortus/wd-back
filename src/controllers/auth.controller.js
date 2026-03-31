@@ -82,7 +82,7 @@ export const login = asyncHandler(async (req, res) => {
     }
 });
 
-export async function getMe(req, res) {
+export const getMe = asyncHandler(async (req, res) => {
     try {
         const user = await User.findById(req.auth.id).select("-passwordHash");
 
@@ -93,4 +93,4 @@ export async function getMe(req, res) {
             message: "getMe error"
         });
     }
-}
+});
