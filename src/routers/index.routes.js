@@ -5,19 +5,7 @@ import productRouter from "./product.routes.js";
 
 const router = Router();
 
-// Auth routes
-router.use("/auth", authRouter);
-
-// Categories routes
-router.use("/categories", categoryRouter);
-
-// Products routes
-router.use("/products", productRouter);
-
-// TODO: add other routes
-
-export default router;
-
+// Swagger docs
 /**
  * @swagger
  * /categories:
@@ -32,3 +20,17 @@ export default router;
  *       201:
  *         description: category created
  */
+
+// Auth routes
+router.use("/auth", authRouter);
+
+// Categories routes
+router.use("/categories", categoryRouter);
+
+// Products routes
+router.use("/products", productRouter);
+
+// TODO: add other routes
+
+export default router;
+

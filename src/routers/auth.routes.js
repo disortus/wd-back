@@ -7,14 +7,7 @@ import { authRateLimit } from "../middleware/rate-limit.middleware.js";
 
 const router = Router();
 
-router.post("/register", authRateLimit, registerValidator, validate, register);
-
-router.post("/login", authRateLimit, loginValidator, validate, login);
-
-router.get("/me", requireAuth, getMe);
-
-export default router;
-
+// Swagger docs
 /**
  * @swagger
  * tags:
@@ -59,3 +52,13 @@ export default router;
  *             schema:
  *               $ref: '#/components/schemas/ValidationErrorResponse'
  */
+
+// POSTs
+router.post("/register", authRateLimit, registerValidator, validate, register);
+
+router.post("/login", authRateLimit, loginValidator, validate, login);
+
+// GETs
+router.get("/me", requireAuth, getMe);
+
+export default router;

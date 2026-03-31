@@ -8,23 +8,7 @@ import { allowRoles } from "../middleware/role.middleware.js";
 
 const router = Router();
 
-// GETs
-router.get("/", getCategory);
-
-router.get("/:id", idParamValidator, validate, getCategoryById);
-
-// ADMIN routes
-// POSTs
-router.post("/admin", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), createCategoryValidator, validate, cretaeCategory);
-
-// PATCHs
-router.patch("/admin/:id", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), updateCategoryValidator, validate, updateCategory);
-
-// DELETEs
-router.delete("/admin/:id", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), idParamValidator, validate, deleteCategory);
-
-export default router;
-
+// Swagger docs
 /**
  * @swagger
  * tags:
@@ -66,3 +50,20 @@ export default router;
  *       201:
  *         description: category created
  */
+
+// GETs
+router.get("/", getCategory);
+
+router.get("/:id", idParamValidator, validate, getCategoryById);
+
+// ADMIN routes
+// POSTs
+router.post("/admin", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), createCategoryValidator, validate, cretaeCategory);
+
+// PATCHs
+router.patch("/admin/:id", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), updateCategoryValidator, validate, updateCategory);
+
+// DELETEs
+router.delete("/admin/:id", requireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), idParamValidator, validate, deleteCategory);
+
+export default router;

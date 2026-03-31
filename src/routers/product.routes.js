@@ -8,23 +8,7 @@ import { allowRoles } from "../middleware/role.middleware.js";
 
 const router = Router();
 
-// GETs
-router.get("/", queryProductsValidator, validate, getProducts);
-
-router.get("/:slug", getProductBySlug);
-
-// ADMIN routes
-// POSTs
-router.post("/admin", reqireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), cretaeProductValidator, validate, cretaeProduct);
-
-// PATCHs
-router.patch("/admin/:id", reqireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), updateProductValidator, validate, updateProduct);
-
-// DELETEs
-router.delete("/admin/:id", reqireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), idParamValidator, validate, deleteProduct);
-
-export default router;
-
+// Swagger docs
 /**
  * @swagger
  * tags:
@@ -73,3 +57,20 @@ export default router;
  *             schema:
  *               $ref: '#/components/schemas/ProductListResponse'
  */
+
+// GETs
+router.get("/", queryProductsValidator, validate, getProducts);
+
+router.get("/:slug", getProductBySlug);
+
+// ADMIN routes
+// POSTs
+router.post("/admin", reqireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), cretaeProductValidator, validate, cretaeProduct);
+
+// PATCHs
+router.patch("/admin/:id", reqireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), updateProductValidator, validate, updateProduct);
+
+// DELETEs
+router.delete("/admin/:id", reqireAuth, allowRoles(USER_ROLE_TYPES.ADMIN), idParamValidator, validate, deleteProduct);
+
+export default router;
