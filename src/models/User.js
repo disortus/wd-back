@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { USER_ROLE_TYPES_LIST, USER_ROLE_TYPES } from "../utils/enums.js";
+import { USER_ROLE_TYPES_LIST, USER_ROLE_TYPES, DB_MODELS } from "../utils/enums.js";
 
 const userSchema = new mongoose.Schema({
     fullname: {
@@ -30,4 +30,4 @@ const userSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model(DB_MODELS.USER, userSchema);

@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
-import { DB_MODELS } from "../utils/enums.js";
+import { CATEGORY_TYPES_LIST, DB_MODELS, SUBCATEGORY_TYPES_LIST } from "../utils/enums.js";
 
 const productShema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
 
     slug: {
@@ -14,18 +15,41 @@ const productShema = new mongoose.Schema({
         index: true
     },
 
+    categorySlug: {
+        type: String,
+        required: true,
+        enum: CATEGORY_TYPES_LIST,
+        index: true
+    },
+
+    subcategorySlug: {
+        type: String,
+        required: true,
+        enum: SUBCATEGORY_TYPES_LIST,
+        index: true
+    },
+
+    attributes: {
+        type: Map,
+        of: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+
     description: {
-        type: String
+        type: String,
+        default: ""
     },
 
     price: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
 
     stock: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     },
 
     category_id: {
@@ -34,8 +58,9 @@ const productShema = new mongoose.Schema({
         required: true
     },
 
-    image: {
-        type: [String]
+    images: {
+        type: [String],
+        default: []
     },
 
     specs: {
@@ -48,4 +73,7 @@ const productShema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-export default mongoose.model("Product", productShema);
+productShema.index({ categorySlug: 1, subcategorySlug: 1 });
+productShema.index({ title: "text", description: "text" });
+
+export default mongoose.model(DB_MODELS.PRODUCT, productShema);
