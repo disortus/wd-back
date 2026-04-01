@@ -1,5 +1,4 @@
 import { version } from "mongoose";
-import { Component } from "react";
 import swaggerJSDoc from "swagger-jsdoc";
 
 const options = {

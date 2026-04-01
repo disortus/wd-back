@@ -52,7 +52,7 @@ const router = Router();
  */
 
 // GETs
-router.get("/", getCategory);
+router.get("/", getCategories);
 
 router.get("/:id", idParamValidator, validate, getCategoryById);
 

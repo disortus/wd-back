@@ -3,7 +3,7 @@ import Product from "../models/Product.js";
 import { AppError } from "../utils/app-errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
-export const cretaeProduct = asyncHandler(async (req, res) => {
+export const createProduct = asyncHandler(async (req, res) => {
     const slug = slugify(req.body.title, { lower: true, strict: true });
 
     const exists = await Product.findOne({ slug });
