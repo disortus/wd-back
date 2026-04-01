@@ -4,7 +4,7 @@ export function validate(req, res, next) {
     const errors = validationResult(req);
 
     if (errors.isEmpty()) {
-        next();
+        return next();
     }
 
     return res.status(400).json({

@@ -4,35 +4,27 @@ import { AppError } from "../utils/app-errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const cretaeCategory = asyncHandler(async (req, res) => {
-    try {
-        const { name, image } = req.body;
+    const { name, image } = req.body;
 
-        const slug = slugify(req.body.name, { lower: true, strict: true });
+    const slug = slugify(req.body.name, { lower: true, strict: true });
 
-        const exists = await Category.findOne({ name });
+    const exists = await Category.findOne({ name });
 
-        if (exists) {
-            throw new AppError(400, "category already exists");
-        }
-
-        const category = Category.create({
-            name,
-            slug,
-            image
-        });
-
-        res.status(201).json({
-            ok: true,
-            message: "category updated",
-            category
-        });
-    } catch (error) {
-        res.status(500).json({
-            ok: false,
-            error,
-            message: "cretate category error"
-        });
+    if (exists) {
+        throw new AppError(400, "category already exists");
     }
+
+    const category = Category.create({
+        name,
+        slug,
+        image
+    });
+
+    res.status(201).json({
+        ok: true,
+        message: "category updated",
+        category
+    });
 });
 
 export const getCategories = asyncHandler(async (req, res) => {
@@ -56,38 +48,23 @@ export const getCategoryById = asyncHandler(async (req, res) => {
 });
 
 export const updateCategory = asyncHandler(async (req, res) => {
-    try {
-        const category = await Category.findByIdAndUpdate(req.params.id, req.body,
-            { new: true, runValidators: true });
-        
-        if (!category) {
-            throw new AppError(404, "category not found");
-        }
-    } catch (error) {
-        return res.status(500).json({
-            error,
-            message: "category update error"
-        });
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body,
+        { new: true, runValidators: true });
+    
+    if (!category) {
+        throw new AppError(404, "category not found");
     }
 });
 
 export const deleteCategory = asyncHandler(async (req, res) => {
-    try {
-        const category = await Category.findByIdAndDelete(req.params.id);
+    const category = await Category.findByIdAndDelete(req.params.id);
 
-        if (!category) {
-            throw new AppError(404, "category not found");
-        }
-
-        res.json({
-            ok: true,
-            message: "category deleted"
-        })
-    } catch (error) {
-        return res.status(500).json({
-            ok: false,
-            error,
-            message: "category delete error"
-        });
+    if (!category) {
+        throw new AppError(404, "category not found");
     }
+
+    res.json({
+        ok: true,
+        message: "category deleted"
+    })
 });
