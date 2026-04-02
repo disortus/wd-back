@@ -1,10 +1,8 @@
 import { Router } from "express";
 import authRouter from "./auth.routes.js";
-import categoryRouter from "./category.routes.js";
-import productRouter from "./product.routes.js";
 import healthRouter from "./health.routes.js";
-import publicRouter from "./public.routes.js";
-import profileRouter from "./profile.routes.js";
+import adminRouter from "./admin/index.routes.js";
+import publicRouter from "./public/index.routes";
 
 const router = Router();
 
@@ -27,20 +25,14 @@ const router = Router();
 // Auth routes
 router.use("/auth", authRouter);
 
-// Categories routes
-router.use("/categories", categoryRouter);
-
-// Products routes
-router.use("/products", productRouter);
+// Admin routes
+router.use("/admin", adminRouter);
 
 // Health routes
 router.use("/health", healthRouter);
 
 // Public routes
 router.use("/public", publicRouter);
-
-// Profile routes
-router.use("/profile", profileRouter);
 
 // TODO: add other routes
 

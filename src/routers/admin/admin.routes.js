@@ -1,11 +1,10 @@
 import { Router } from "express";
-import { createUser, updateUser, getUsers, deleteUser } from "../controllers/admin.controller.js";
-import { createUserValidator, updateUserValidator, idParamValidator } from "../validators/admin.validator.js";
-import { USER_ROLE_TYPES } from "../utils/enums";
-import { requireAuth } from "../middleware/auth.middleware.js";
-import { allowRoles } from "../middleware/role.middleware.js";
-import { validate } from "../middleware/validation.middleware.js";
-import User from "../models/User.js";
+import { createUser, updateUser, getUsers, deleteUser } from "../../controllers/admin.controller.js";
+import { createUserValidator, updateUserValidator, idParamValidator } from "../../validators/admin.validator.js";
+import { USER_ROLE_TYPES } from "../../utils/enums.js";
+import { requireAuth } from "../../middleware/auth.middleware.js";
+import { allowRoles } from "../../middleware/role.middleware.js";
+import { validate } from "../../middleware/validation.middleware.js";
 
 const router = Router();
 

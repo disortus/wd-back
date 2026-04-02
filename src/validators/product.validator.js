@@ -1,8 +1,15 @@
 import { body, param, query} from "express-validator";
+import { CATEGORY_TYPES_LIST, SUBCATEGORY_TYPES_LIST } from "../utils/enums";
 
 export const createProductValidator = [
     body("title")
         .isLength({ min: 3 }).withMessage(" title too short"),
+
+    body("categorySlug")
+        .isIn(CATEGORY_TYPES_LIST).withMessage("invalid category type"),
+
+    body("subcategorySlug")
+        .isIn(SUBCATEGORY_TYPES_LIST).withMessage("invalid subcategory type"),
     
     body("price")
         .isFloat({ min: 0 }).withMessage("price can't be less than 0"),
@@ -10,6 +17,10 @@ export const createProductValidator = [
     body("stock")
         .optional()
         .isInt({ min: 0 }).withMessage("stock can't be less than 0"),
+    
+    body("attributes")
+        .optional()
+        .isObject(),
     
     body("category_id")
         .isMongoId().withMessage("invalid id format"),

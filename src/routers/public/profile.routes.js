@@ -1,9 +1,8 @@
 import { Router } from "express";
-import { getMe, updateMe } from "../controllers/profile.controller.js";
-import { requireAuth } from "../middleware/auth.middleware.js";
-import { validate } from "../middleware/validation.middleware.js";
-import { updateProfileValidator } from "../validators/profile.validator.js";
-import { get } from "mongoose";
+import { getMe, updateMe } from "../../controllers/profile.controller.js";
+import { requireAuth } from "../../middleware/auth.middleware.js";
+import { validate } from "../../middleware/validation.middleware.js";
+import { updateProfileValidator } from "../../validators/profile.validator.js";
 
 const router = Router();
 
