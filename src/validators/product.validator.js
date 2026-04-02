@@ -1,5 +1,5 @@
 import { body, param, query} from "express-validator";
-import { CATEGORY_TYPES_LIST, SUBCATEGORY_TYPES_LIST } from "../utils/enums";
+import { CATEGORY_TYPES_LIST, SUBCATEGORY_TYPES_LIST } from "../utils/enums.js";
 
 export const createProductValidator = [
     body("title")

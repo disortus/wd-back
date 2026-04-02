@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DB_MODELS, SUBCATEGORY_TYPES_LIST, CATEGORY_TYPES_LIST } from "../utils/enums";
+import { DB_MODELS, SUBCATEGORY_TYPES_LIST, CATEGORY_TYPES_LIST } from "../utils/enums.js";
 
 const subcategorySchema = new mongoose.Schema({
     slug: {

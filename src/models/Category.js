@@ -1,5 +1,5 @@
-import mongoose, { mongo } from "mongoose";
-import { DB_MODELS, CATEGORY_TYPES_LIST } from "../utils/enums";
+import mongoose from "mongoose";
+import { DB_MODELS, CATEGORY_TYPES_LIST } from "../utils/enums.js";
 
 const categorySchema = new mongoose.Schema({
     name: {
@@ -18,7 +18,13 @@ const categorySchema = new mongoose.Schema({
     },
 
     image: {
-        type: String
+        type: String,
+        default: ""
+    },
+
+    isActive: {
+        type: Boolean,
+        default: true
     }
 }, { timestamps: true });
 

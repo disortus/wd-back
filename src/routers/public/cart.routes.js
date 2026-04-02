@@ -7,6 +7,12 @@ import {
     clearCart 
 } from "../../controllers/public/cart.controller.js";
 import { requireAuth } from "../../middleware/auth.middleware.js";
+import { validate } from "../../middleware/validation.middleware.js";
+import { 
+    addToCartValidator, 
+    updateCartItemValidator,
+    removeFromCartValidator 
+} from "../../validators/cart.validator.js";
 
 const router = Router();
 
@@ -17,13 +23,13 @@ router.use(requireAuth);
 router.get("/", getCart);
 
 // POST /api/public/cart
-router.post("/", addToCart);
+router.post("/", addToCartValidator, validate, addToCart);
 
 // PATCH /api/public/cart/:productId
-router.patch("/:productId", updateCartItem);
+router.patch("/:productId", updateCartItemValidator, validate, updateCartItem);
 
 // DELETE /api/public/cart/:productId
-router.delete("/:productId", removeFromCart);
+router.delete("/:productId", removeFromCartValidator, validate, removeFromCart);
 
 // DELETE /api/public/cart
 router.delete("/", clearCart);

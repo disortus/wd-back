@@ -3,8 +3,7 @@ import {
     getUsers, 
     getUser, 
     createUser, 
-    updateUser, 
-    updateUserPassword,
+    updateUser,
     toggleUserActive,
     deleteUser,
     getUsersByRole,
@@ -37,9 +36,6 @@ router.get("/:id", getUser);
 
 // PATCH /api/admin/users/:id
 router.patch("/:id", updateUser);
-
-// POST /api/admin/users/:id/password
-router.post("/:id/password", updateUserPassword);
 
 // PATCH /api/admin/users/:id/toggle
 router.patch("/:id/toggle", toggleUserActive);
