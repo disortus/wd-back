@@ -30,7 +30,6 @@ export const getProducts = asyncHandler(async (req, res) => {
     if (search) {
         filter.title = {
             $regex: search,
-
             $options: "i"
         };
     }
@@ -46,6 +45,7 @@ export const getProducts = asyncHandler(async (req, res) => {
     const total = await Product.countDocuments(filter);
 
     res.json({
+        ok: true,
         data: products,
         total,
         page,

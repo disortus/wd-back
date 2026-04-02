@@ -11,7 +11,7 @@ export const register = asyncHandler(async (req, res) => {
     const exists = await User.findOne({ email });
 
     if (exists) {
-        throw new AppError(400, "email already exists");
+        throw new AppError(400, "Email already exists");
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -25,17 +25,23 @@ export const register = asyncHandler(async (req, res) => {
         role: USER_ROLE_TYPES.USER,
     });
 
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
     const token = generateAccessToken(user);
 
-    res.json({
-        user: {
-            id: user._id,
-            fullname: user.fullname,
-            email: user.email,
-            role: user.role,
-        },
-
-        token,
+    res.status(201).json({
+        ok: true,
+        data: {
+            user: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                role: user.role,
+            },
+            token,
+        }
     });
 });
 
@@ -45,31 +51,49 @@ export const login = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-        throw new AppError(400, "invalid credentails");
+        throw new AppError(400, "Invalid credentials");
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+        throw new AppError(403, "Account is deactivated");
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
-        throw new AppError(400, "invalid email or password");
+        throw new AppError(400, "Invalid email or password");
     }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
 
     const token = generateAccessToken(user);
 
     return res.json({
-        user: {
-            id: user._id,
-            fullname: user.fullname,
-            email: user.email,
-            role: user.role
-        },
-
-        token
+        ok: true,
+        data: {
+            user: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                role: user.role
+            },
+            token
+        }
     });
 });
 
 export const getMe = asyncHandler(async (req, res) => {
     const user = await User.findById(req.auth.id).select("-passwordHash");
 
-    res.json(user);
+    if (!user) {
+        throw new AppError(404, "User not found");
+    }
+
+    res.json({
+        ok: true,
+        data: user
+    });
 });

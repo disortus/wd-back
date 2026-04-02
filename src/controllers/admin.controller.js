@@ -2,7 +2,6 @@ import bcrypt, { genSalt } from "bcrypt";
 import User from "../models/User.js";
 import { AppError } from "../utils/app-errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import { use } from "react";
 
 export const createUser = asyncHandler(async (req, res) => {
     const { fullname, email, password, role, phone } = req.body;

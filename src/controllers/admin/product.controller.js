@@ -1,26 +1,14 @@
 import slugify from "slugify";
-
 import Product from "../../models/Product.js";
-
 import Category from "../../models/Category.js";
-
 import Subcategory from "../../models/Subcategory.js";
-
-import {
-  ensureSubcategoryBelongsToCategory,
-  validateProductAttributes
-} from "../../utils/catalog-helpers.js";
-
+import { ensureSubcategoryBelongsToCategory, validateProductAttributes } from "../../utils/catalog-helpers.js";
 import { asyncHandler } from "../../utils/async-handler.js";
-
 import { AppError } from "../../utils/app-errors.js";
-
 
 export const createProduct = asyncHandler(
   async (req, res) => {
-
     const {
-
       title,
       categorySlug,
       subcategorySlug,
@@ -29,91 +17,40 @@ export const createProduct = asyncHandler(
       price,
       stock,
       images
-
     } = req.body;
-
 
     ensureSubcategoryBelongsToCategory(
       categorySlug,
       subcategorySlug
     );
 
-
     validateProductAttributes(
       subcategorySlug,
       attributes
     );
 
-
-    const category =
-      await Category.findOne({
-
-        slug: categorySlug,
-        isActive: true
-
-      });
-
+    const category = await Category.findOne({ slug: categorySlug, isActive: true });
 
     if (!category) {
-
-      throw new AppError(
-        400,
-        "category disabled"
-      );
-
+      throw new AppError(400, "Category disabled");
     }
 
-
-    const subcategory =
-      await Subcategory.findOne({
-
-        slug: subcategorySlug,
-        categorySlug,
-        isActive: true
-
-      });
-
+    const subcategory = await Subcategory.findOne({ slug: subcategorySlug, categorySlug, isActive: true });
 
     if (!subcategory) {
-
-      throw new AppError(
-        400,
-        "subcategory disabled"
-      );
-
+      throw new AppError(400, "Subcategory disabled");
     }
 
 
-    const slug =
-      slugify(title, {
+    const slug = slugify(title, { lower: true, strict: true });
 
-        lower: true,
-        strict: true
-
-      });
-
-
-    const exists =
-      await Product.findOne({
-
-        slug
-
-      });
-
+    const exists = await Product.findOne({ slug });
 
     if (exists) {
-
-      throw new AppError(
-        409,
-        "product exists"
-      );
-
+      throw new AppError(409, "Product exists");
     }
 
-
-    const product =
-      await Product.create({
-
+    const product = await Product.create({
         title,
         slug,
         categorySlug,
@@ -123,16 +60,11 @@ export const createProduct = asyncHandler(
         price,
         stock,
         images
-
       });
 
-
     res.status(201).json({
-
-      success: true,
-
+      ok: true,
       data: product
-
     });
 
   }
@@ -142,42 +74,16 @@ export const createProduct = asyncHandler(
 
 export const updateProduct = asyncHandler(
   async (req, res) => {
-
-    const product =
-      await Product.findByIdAndUpdate(
-
-        req.params.id,
-
-        req.body,
-
-        {
-
-          new: true,
-          runValidators: true
-
-        }
-
-      );
-
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
 
     if (!product) {
-
-      throw new AppError(
-        404,
-        "product not found"
-      );
-
+      throw new AppError(404, "Product not found");
     }
 
-
     res.json({
-
-      success: true,
-
+      ok: true,
       data: product
-
     });
-
   }
 );
 
@@ -185,51 +91,27 @@ export const updateProduct = asyncHandler(
 
 export const deleteProduct = asyncHandler(
   async (req, res) => {
-
-    const product =
-      await Product.findByIdAndDelete(
-
-        req.params.id
-
-      );
-
+    const product = await Product.findByIdAndDelete(req.params.id);
 
     if (!product) {
-
-      throw new AppError(
-        404,
-        "product not found"
-      );
-
+      throw new AppError(404, "Product not found");
     }
 
-
     res.json({
-
-      success: true
-
+      ok: true,
+      message: "Product deleted"
     });
-
   }
 );
 
 
-
 export const getProductsAdmin = asyncHandler(
   async (req, res) => {
-
-    const products =
-      await Product.find()
-        .sort({ createdAt: -1 });
-
+    const products = await Product.find().sort({ createdAt: -1 });
 
     res.json({
-
-      success: true,
-
+      ok: true,
       data: products
-
     });
-
   }
 );
