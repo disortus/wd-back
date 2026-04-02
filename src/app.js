@@ -11,6 +11,7 @@ import { globalRateLimit } from "./middleware/rate-limit.middleware.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import cookieParser from "cookie-parser";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,9 +35,12 @@ const errorLogStream = fs.createWriteStream(
 
 const app = express();
 
+// Cookie parser
+app.use(cookieParser());
+
 // CORS
 app.use(cors({
-    origin: "*",
+    origin: "http://localhost:5173",
     credentials: true
 }));
 
@@ -60,6 +64,7 @@ app.use(globalRateLimit);
 
 // HTTP requests logger (combined format to file)
 app.use(morgan("combined", { stream: accessLogStream }));
+
 // Also log to console in development
 app.use(morgan("dev"));
 

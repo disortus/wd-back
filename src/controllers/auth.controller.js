@@ -31,6 +31,13 @@ export const register = asyncHandler(async (req, res) => {
 
     const token = generateAccessToken(user);
 
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: false, // true prod only https
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.status(201).json({
         ok: true,
         data: {
@@ -70,6 +77,14 @@ export const login = asyncHandler(async (req, res) => {
     await user.save();
 
     const token = generateAccessToken(user);
+
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: false, // true prod only https
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     return res.json({
         ok: true,
