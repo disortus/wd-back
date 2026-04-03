@@ -1,39 +1,41 @@
-# API Documentation for Frontend AI Assistant
+# API Documentation для Frontend AI Assistant
 
-## Overview
+## Обзор
 
-This is an **Apple Store Backend API** (`wd-back`) - an e-commerce platform for Apple-style products with role-based order management, support tickets, and a complete catalog system.
+Это **Apple Store Backend API** (`wd-back`) — платформа электронной коммерции для продуктов Apple-стиля с управлением заказами на основе ролей, тикетами поддержки и полной системой каталога.
 
-**Base URL:** `http://localhost:5000/api`
-**Documentation:** `http://localhost:5000/docs` (Swagger UI)
-**Auth Method:** JWT Bearer Token (sent in `Authorization: Bearer <token>` header)
+**Base URL:** `http://localhost:5000/api`  
+**Документация:** `http://localhost:5000/docs` (Swagger UI)  
+**Метод аутентификации:** JWT Bearer Token (в заголовке `Authorization: Bearer <token>`)
 
 ---
 
-## Project Architecture
+## Архитектура проекта
 
-### Technology Stack
-- **Runtime:** Node.js with ES Modules
+### Технологический стек
+
+- **Runtime:** Node.js с ES Modules
 - **Framework:** Express.js v5
-- **Database:** MongoDB with Mongoose ODM
-- **Authentication:** JWT (jsonwebtoken)
-- **Validation:** express-validator
-- **Security:** helmet, cors, rate-limiting
+- **База данных:** MongoDB с Mongoose ODM
+- **Аутентификация:** JWT (jsonwebtoken)
+- **Валидация:** express-validator
+- **Безопасность:** helmet, cors, rate-limiting
 
-### User Roles (enum)
-| Role | Description |
-|------|-------------|
-| `user` | Regular customer |
-| `admin` | Full system access |
-| `moderator` | Order processing (accept, pack, assign to courier) |
-| `courier` | Delivery management |
-| `support` | Support ticket handling |
+### Роли пользователей
+
+| Роль | Описание |
+|------|----------|
+| `user` | Обычный покупатель |
+| `admin` | Полный доступ к системе |
+| `moderator` | Обработка заказов (принять, упаковать, назначить курьера) |
+| `courier` | Управление доставкой |
+| `support` | Обработка тикетов поддержки |
 
 ---
 
-## API Endpoints Summary
+## Сводка API Endpoints
 
-### 🔓 Public Routes (No Auth Required)
+### 🔓 Публичные маршруты (без авторизации)
 
 #### Health Check
 ```
@@ -41,19 +43,19 @@ GET /api/health
 Response: { ok: true, uptime: number }
 ```
 
-#### Home Page Data
+#### Данные главной страницы
 ```
 GET /api/public/
 Response: { ok: true, data: { hero, featuredCategories, newArrivals, popularProducts, advantages } }
 ```
 
-#### Catalog
+#### Каталог
 ```
 GET /api/public/catalog/tree
 Response: { ok: true, data: { [categorySlug]: { name, subcategories: { [subSlug]: { name, attributes } } } } }
 ```
 
-#### Products
+#### Товары
 ```
 GET /api/public/products
 Query: ?category=electronics&subcategory=smartphones&minPrice=100&maxPrice=1000&search=iPhone&page=1&limit=10
@@ -65,25 +67,25 @@ Response: { ok: true, data: Product }
 
 ---
 
-### 🔐 Auth Routes
+### 🔐 Маршруты аутентификации
 
-#### Register
+#### Регистрация
 ```
 POST /api/auth/register
-Body: { fullname: string, email: string, password: string, phone?: string }
-Response: { ok: true, data: { user: { id, fullname, email, role }, token } }
+Body: { fullname: string, phone: string, password: string }
+Response: { ok: true, data: { user: { id, fullname, phone, role }, token } }
 Rate Limit: 20 requests per 15 minutes
 ```
 
-#### Login
+#### Вход
 ```
 POST /api/auth/login
-Body: { email: string, password: string }
-Response: { ok: true, data: { user: { id, fullname, email, role }, token } }
+Body: { phone: string, password: string }
+Response: { ok: true, data: { user: { id, fullname, phone, role }, token } }
 Rate Limit: 20 requests per 15 minutes
 ```
 
-#### Get Current User
+#### Получить текущего пользователя
 ```
 GET /api/auth/me
 Auth: Bearer Token
@@ -92,36 +94,36 @@ Response: { ok: true, data: User }
 
 ---
 
-### 🛒 Cart Routes (Auth Required)
+### 🛒 Маршруты корзины (требуется авторизация)
 
-#### Get Cart
+#### Получить корзину
 ```
 GET /api/public/cart
 Response: { ok: true, data: { user, items: [...], totalItems, subtotal } }
 ```
 
-#### Add to Cart
+#### Добавить в корзину
 ```
 POST /api/public/cart
 Body: { productId: string, quantity?: number, attributes?: [{ key: string, value: any }] }
 Response: { ok: true, data: Cart }
-Note: Attributes must match subcategory schema
+Note: Атрибуты должны соответствовать схеме подкатегории
 ```
 
-#### Update Cart Item Quantity
+#### Обновить количество товара в корзине
 ```
 PATCH /api/public/cart/:productId
 Body: { quantity: number }
 Response: { ok: true, data: Cart }
 ```
 
-#### Remove from Cart
+#### Удалить из корзины
 ```
 DELETE /api/public/cart/:productId?attributes=JSON
 Response: { ok: true, data: Cart }
 ```
 
-#### Clear Cart
+#### Очистить корзину
 ```
 DELETE /api/public/cart
 Response: { ok: true, data: Cart }
@@ -129,9 +131,9 @@ Response: { ok: true, data: Cart }
 
 ---
 
-### 📦 Order Routes (Auth Required)
+### 📦 Маршруты заказов (требуется авторизация)
 
-#### Create Order (from cart)
+#### Создать заказ (из корзины)
 ```
 POST /api/public/orders
 Body: {
@@ -140,34 +142,34 @@ Body: {
   recipientPhone: string
 }
 Response: { ok: true, data: Order }
-Side Effects: Cart cleared, stock decremented, user stats updated
+Side Effects: Корзина очищена, остаток уменьшен, статистика пользователя обновлена
 ```
 
-#### Get My Orders
+#### Получить мои заказы
 ```
 GET /api/public/orders?page=1&limit=10&status=created
 Response: { ok: true, data: [Order], pagination: { page, limit, total, pages } }
 ```
 
-#### Get Single Order
+#### Получить один заказ
 ```
 GET /api/public/orders/:id
 Response: { ok: true, data: Order }
 ```
 
-#### Cancel Order
+#### Отменить заказ
 ```
 POST /api/public/orders/:id/cancel
 Body: { reason?: string }
 Response: { ok: true, data: Order }
-Note: Cannot cancel if status is "in_delivery" or "delivered"
+Note: Нельзя отменить если статус "in_delivery" или "delivered"
 ```
 
 ---
 
-### 🎫 Support Ticket Routes (Auth Required)
+### 🎫 Маршруты тикетов поддержки (требуется авторизация)
 
-#### Create Ticket
+#### Создать тикет
 ```
 POST /api/public/tickets
 Body: {
@@ -180,85 +182,85 @@ Body: {
 Response: { ok: true, data: Ticket }
 ```
 
-#### Get My Tickets
+#### Получить мои тикеты
 ```
 GET /api/public/tickets?page=1&limit=10&status=open
 Response: { ok: true, data: [Ticket], pagination }
 ```
 
-#### Get Single Ticket
+#### Получить один тикет
 ```
 GET /api/public/tickets/:id
 Response: { ok: true, data: Ticket }
 ```
 
-#### Add Message to Ticket
+#### Добавить сообщение к тикету
 ```
 POST /api/public/tickets/:id/messages
 Body: { message: string, attachments?: [string] }
 Response: { ok: true, data: Ticket }
 ```
 
-#### Rate Ticket
+#### Оценить тикет
 ```
 POST /api/public/tickets/:id/rate
 Body: { rating: 1-5, feedback?: string }
 Response: { ok: true, data: Ticket }
-Note: Only for resolved/closed tickets
+Note: Только для resolved/closed тикетов
 ```
 
 ---
 
-### 👤 Profile Routes (Auth Required)
+### 👤 Маршруты профиля (требуется авторизация)
 
-#### Get My Profile
+#### Получить мой профиль
 ```
 GET /api/public/profile/me
-Response: { ok: true, data: User (full profile with addresses, notifications) }
+Response: { ok: true, data: User (полный профиль с адресами, уведомлениями) }
 ```
 
-#### Update My Profile
+#### Обновить мой профиль
 ```
 PATCH /api/public/profile/me
 Body: { fullname?, phone?, profile?: {...}, addresses?: [...], notifications?: {...} }
 Response: { ok: true, data: User }
 ```
 
-#### Get Order History
+#### Получить историю заказов
 ```
 GET /api/public/profile/orders?page=1&limit=10
 Response: { ok: true, data: [Order], pagination }
 ```
 
-#### Get Active Orders
+#### Получить активные заказы
 ```
 GET /api/public/profile/orders/active
 Response: { ok: true, data: [Order] }
-Note: Returns orders with status in ["created", "accepted_by_moderator", "packed", "assigned_to_courier", "in_delivery"]
+Note: Возвращает заказы со статусами ["created", "accepted_by_moderator", "packed", "assigned_to_courier", "in_delivery"]
 ```
 
-#### Get Order Tracking
+#### Получить отслеживание заказа
 ```
 GET /api/public/profile/orders/:orderId/tracking
 Response: { ok: true, data: { orderNumber, status, statusHistory, items, totalPrice, deliveryAddress, recipientName, recipientPhone, moderator, courier, deliveryNote, createdAt, updatedAt } }
 ```
 
-#### Get My Tickets (via profile)
+#### Получить мои тикеты (через профиль)
 ```
 GET /api/public/profile/tickets?page=1&limit=10
 Response: { ok: true, data: [Ticket], pagination }
 ```
 
-#### Manage Addresses
+#### Управление адресами
 ```
-POST /api/public/profile/addresses        - Add address
-PATCH /api/public/profile/addresses/:addressId  - Update address
-DELETE /api/public/profile/addresses/:addressId  - Delete address
+POST /api/public/profile/addresses        - Добавить адрес
+PATCH /api/public/profile/addresses/:addressId  - Обновить адрес
+DELETE /api/public/profile/addresses/:addressId  - Удалить адрес
 Body: { label?, recipientName, phone, street, city, postalCode, country, instructions?, isDefault? }
 Response: { ok: true, data: [Address] }
 ```
 
-#### Get User Stats
+#### Получить статистику пользователя
 ```
 GET /api/public/profile/stats
 Response: { ok: true, data: { totalOrders, activeOrders, totalSpent, totalTickets, openTickets } }
@@ -266,9 +268,9 @@ Response: { ok: true, data: { totalOrders, activeOrders, totalSpent, totalTicket
 
 ---
 
-### 👨‍💼 Admin Routes (Admin Role Required)
+### 👨‍💼 Маршруты администратора (требуется роль: admin)
 
-#### User Management
+#### Управление пользователями
 ```
 GET /api/admin/users/stats
 Response: { ok: true, data: { totalUsers, activeUsers, usersByRole: {...}, recentUsers } }
@@ -283,21 +285,21 @@ GET /api/admin/users/:id
 Response: { ok: true, data: User }
 
 POST /api/admin/users
-Body: { fullname, email, password, role, phone }
-Response: { ok: true, data: { id, fullname, email, role, createdAt } }
+Body: { fullname, phone, password, role, phone }
+Response: { ok: true, data: { id, fullname, phone, role, createdAt } }
 
 PATCH /api/admin/users/:id
 Body: { fullname?, phone?, role?, isActive?, staffInfo? }
 Response: { ok: true, data: User }
 
 PATCH /api/admin/users/:id/toggle
-Response: { ok: true, data: { id, fullname, email, role, isActive } }
+Response: { ok: true, data: { id, fullname, phone, role, isActive } }
 
 DELETE /api/admin/users/:id
 Response: { ok: true, message: "User deactivated successfully" }
 ```
 
-#### Catalog Management
+#### Управление каталогом
 ```
 GET /api/admin/catalog/structure
 Response: { ok: true, data: { categories, subcategories, attributes } }
@@ -310,13 +312,13 @@ Response: { ok: true, message: "Catalog seeded successfully", data: { categories
 
 PATCH /api/admin/catalog/categories/:id/toggle
 Response: { ok: true, data: Category }
-Note: Also toggles all subcategories
+Note: Также переключает все подкатегории
 
 PATCH /api/admin/catalog/subcategories/:id/toggle
 Response: { ok: true, data: Subcategory }
 ```
 
-#### Product Management
+#### Управление товарами
 ```
 GET /api/admin/products
 Response: { ok: true, data: [Product] }
@@ -344,13 +346,13 @@ Response: { ok: true }
 
 ---
 
-### ⚖️ Moderator Routes (Moderator/Admin Role)
+### ⚖️ Маршруты модератора (требуется роль: moderator/admin)
 
-#### Order Management
+#### Управление заказами
 ```
 GET /api/moderator/orders?page=1&limit=20&status=created
 Response: { ok: true, data: [Order], pagination }
-Default: Shows orders with status in [created, accepted_by_moderator, packed]
+Default: Показывает заказы со статусами [created, accepted_by_moderator, packed]
 
 GET /api/moderator/orders/stats
 Response: { ok: true, data: { totalOrders, ordersByStatus: {...}, totalRevenue, recentOrders } }
@@ -363,36 +365,36 @@ Response: { ok: true, data: Order }
 
 POST /api/moderator/orders/:id/accept
 Response: { ok: true, data: Order }
-Note: Assigns order to moderator, changes status to "accepted_by_moderator"
+Note: Назначает заказ модератору, меняет статус на "accepted_by_moderator"
 
 POST /api/moderator/orders/:id/pack
 Response: { ok: true, data: Order }
-Note: Changes status to "packed", only assigned moderator can pack
+Note: Меняет статус на "packed", только назначенный модератор может упаковать
 
 POST /api/moderator/orders/:id/assign
 Body: { courierId: string }
 Response: { ok: true, data: Order }
-Note: Changes status to "assigned_to_courier"
+Note: Меняет статус на "assigned_to_courier"
 
 POST /api/moderator/orders/:id/cancel
 Body: { reason?: string }
 Response: { ok: true, data: Order }
-Note: Restores stock, updates user stats
+Note: Восстанавливает остаток, обновляет статистику пользователя
 ```
 
 ---
 
-### 🚴 Courier Routes (Courier/Admin Role)
+### 🚴 Маршруты курьера (требуется роль: courier/admin)
 
-#### Delivery Management
+#### Управление доставкой
 ```
 GET /api/courier/orders
 Response: { ok: true, data: [Order], pagination }
-Note: Shows orders assigned to this courier
+Note: Показывает заказы назначенные этому курьеру
 
 GET /api/courier/orders/available
 Response: { ok: true, data: [Order], pagination }
-Note: Shows orders with status "assigned_to_courier" and no courier assigned
+Note: Показывает заказы со статусом "assigned_to_courier" без назначенного курьера
 
 GET /api/courier/orders/stats
 Response: { ok: true, data: { totalDelivered, inDelivery, pending, totalEarnings } }
@@ -402,17 +404,17 @@ Response: { ok: true, data: Order }
 
 POST /api/courier/orders/:id/accept
 Response: { ok: true, data: Order }
-Note: Assigns courier to order
+Note: Назначает курьера на заказ
 
 POST /api/courier/orders/:id/start
 Body: { deliveryNote?: string }
 Response: { ok: true, data: Order }
-Note: Changes status to "in_delivery"
+Note: Меняет статус на "in_delivery"
 
 POST /api/courier/orders/:id/delivered
 Body: { deliveryNote?: string }
 Response: { ok: true, data: Order }
-Note: Changes status to "delivered", sets deliveredAt
+Note: Меняет статус на "delivered", устанавливает deliveredAt
 
 PATCH /api/courier/orders/:id/status
 Body: { status: "assigned_to_courier"|"in_delivery"|"delivered", deliveryNote?: string }
@@ -421,18 +423,18 @@ Response: { ok: true, data: Order }
 
 ---
 
-### 🎧 Support Routes (Support/Admin Role)
+### 🎧 Маршруты поддержки (требуется роль: support/admin)
 
-#### Ticket Management
+#### Управление тикетами
 ```
 GET /api/support/tickets
 Response: { ok: true, data: [Ticket], pagination }
-Note: Shows tickets assigned to this support agent
+Note: Показывает тикеты назначенные этому агенту поддержки
 
 GET /api/support/tickets/open
 Query: ?page=1&limit=20&priority=high&category=order
 Response: { ok: true, data: [Ticket], pagination }
-Note: Shows all open tickets (high priority first)
+Note: Показывает все открытые тикеты (высокий приоритет первым)
 
 GET /api/support/tickets/stats
 Response: { ok: true, data: { open, myAssigned, myResolved, myClosed, avgResolutionTimeMs } }
@@ -442,11 +444,11 @@ Response: { ok: true, data: Ticket }
 
 POST /api/support/tickets/:id/accept
 Response: { ok: true, data: Ticket }
-Note: Assigns ticket to support agent, changes status to "assigned"
+Note: Назначает тикет агенту поддержки, меняет статус на "assigned"
 
 POST /api/support/tickets/:id/release
 Response: { ok: true, data: Ticket }
-Note: Releases assignment, status back to "open"
+Note: Освобождает назначение, статус обратно "open"
 
 POST /api/support/tickets/:id/message
 Body: { message: string, attachments?: [string] }
@@ -455,29 +457,28 @@ Response: { ok: true, data: Ticket }
 POST /api/support/tickets/:id/resolve
 Body: { message?: string }
 Response: { ok: true, data: Ticket }
-Note: Changes status to "resolved"
+Note: Меняет статус на "resolved"
 
 POST /api/support/tickets/:id/close
 Body: { message?: string }
 Response: { ok: true, data: Ticket }
-Note: Changes status to "closed"
+Note: Меняет статус на "closed"
 
 POST /api/support/tickets/:id/reopen
 Body: { reason?: string }
 Response: { ok: true, data: Ticket }
-Note: Only for resolved tickets, status to "assigned"
+Note: Только для resolved тикетов, статус на "assigned"
 ```
 
 ---
 
-## Data Models
+## Модели данных
 
 ### User
 ```javascript
 {
   _id: ObjectId,
   fullname: string,
-  email: string,
   passwordHash: string,
   phone: string,
   role: "user"|"admin"|"moderator"|"courier"|"support"|"developer",
@@ -548,7 +549,7 @@ Note: Only for resolved tickets, status to "assigned"
   _id: ObjectId,
   orderNumber: "ORD-XXXX-XXXX-0001",
   userId: ObjectId,
-  userSnapshot: { fullname, email, phone },
+  userSnapshot: { fullname, phone },
   items: [{
     product: ObjectId,
     productSnapshot: { title, slug, image },
@@ -599,14 +600,14 @@ Note: Only for resolved tickets, status to "assigned"
   _id: ObjectId,
   ticketNumber: "TKT-XXXX-XXXX-0001",
   user: ObjectId,
-  userSnapshot: { fullname, email, phone },
+  userSnapshot: { fullname, phone },
   subject: string,
   description: string,
   category: "order"|"product"|"delivery"|"payment"|"account"|"technical"|"other",
   priority: "low"|"medium"|"high"|"urgent",
   status: "open"|"assigned"|"resolved"|"closed",
   assignedTo: ObjectId,
-  assignedToSnapshot: { fullname, email },
+  assignedToSnapshot: { fullname, phone },
   assignedAt: Date,
   messages: [{
     sender: ObjectId,
@@ -655,17 +656,19 @@ Note: Only for resolved tickets, status to "assigned"
 
 ---
 
-## Order Status Flow
+## Поток статусов заказов
+
 ```
 created → accepted_by_moderator → packed → assigned_to_courier → in_delivery → delivered
                                       ↓
                                   canceled
 
-User can cancel at: created, accepted_by_moderator, packed
-User CANNOT cancel at: assigned_to_courier, in_delivery, delivered
+Пользователь может отменить: created, accepted_by_moderator, packed
+Пользователь НЕ может отменить: assigned_to_courier, in_delivery, delivered
 ```
 
-## Ticket Status Flow
+## Поток статусов тикетов
+
 ```
 open → assigned → resolved → closed
          ↓
@@ -674,8 +677,9 @@ open → assigned → resolved → closed
 
 ---
 
-## Category/Subcategory Structure
-Categories and their subcategories are defined in `src/utils/enums.js`:
+## Структура категорий/подкатегорий
+
+Категории и их подкатегории определены в `src/utils/enums.js`:
 
 **electronics:**
 - smartphones, laptops, tablets, smart_watches, headphones, desktops
@@ -688,17 +692,17 @@ Categories and their subcategories are defined in `src/utils/enums.js`:
 
 ---
 
-## Product Attributes by Subcategory
+## Атрибуты товаров по подкатегориям
 
-Each subcategory has specific attributes (defined in enums.js). Example for smartphones:
+Каждая подкатегория имеет определенные атрибуты (определены в enums.js). Пример для smartphones:
 - display, display_size, processor, battery, storage, ram
 - camera_main, camera_front, sim_type, color, weight, water_resistance
 
 ---
 
-## Response Format
+## Формат ответа
 
-### Success Response
+### Успешный ответ
 ```json
 {
   "ok": true,
@@ -706,7 +710,7 @@ Each subcategory has specific attributes (defined in enums.js). Example for smar
 }
 ```
 
-### Success with Pagination
+### Успешный ответ с пагинацией
 ```json
 {
   "ok": true,
@@ -720,7 +724,7 @@ Each subcategory has specific attributes (defined in enums.js). Example for smar
 }
 ```
 
-### Error Response
+### Ошибка
 ```json
 {
   "ok": false,
@@ -728,7 +732,7 @@ Each subcategory has specific attributes (defined in enums.js). Example for smar
 }
 ```
 
-### Validation Error
+### Ошибка валидации
 ```json
 {
   "ok": false,
@@ -740,42 +744,42 @@ Each subcategory has specific attributes (defined in enums.js). Example for smar
 
 ---
 
-## Authentication Flow
+## Поток аутентификации
 
-1. User registers `/api/auth/register` or logs in `/api/auth/login`
-2. Server returns JWT token
-3. Frontend stores token (localStorage/cookie)
-4. All protected requests include header: `Authorization: Bearer <token>`
-5. Token payload: `{ id: userId, role: userRole }`
+1. Пользователь регистрируется `/api/auth/register` или входит `/api/auth/login`
+2. Сервер возвращает JWT токен
+3. Фронтенд сохраняет токен (localStorage/cookie)
+4. Все защищенные запросы включают заголовок: `Authorization: Bearer <token>`
+5. Токен payload: `{ id: userId, role: userRole }`
 
 ---
 
 ## Rate Limiting
 
-- **Auth endpoints:** 20 requests per 15 minutes
-- **All other endpoints:** 300 requests per 15 minutes
+- **Эндпоинты аутентификации:** 20 запросов за 15 минут
+- **Все остальные эндпоинты:** 300 запросов за 15 минут
 
 ---
 
-## Notes for Frontend Development
+## Заметки для Frontend разработки
 
-1. **Stock Management:** Always check stock before adding to cart
-2. **Price Snapshots:** Order items store price at time of order creation
-3. **User Stats:** Updated automatically on order creation/cancellation
-4. **Address Management:** Support for multiple addresses with default flag
-5. **Ticket Categories:** Can link tickets to specific orders via `relatedOrderId`
-6. **Product Attributes:** Must match subcategory schema (defined in enums)
-7. **Order Cancellation:** User cannot cancel once "in_delivery" status
-8. **Ticket Messaging:** Both user and support can add messages
-9. **Swagger Docs:** Available at `/docs` for interactive API testing
+1. **Управление остатками:** Всегда проверяйте остаток перед добавлением в корзину
+2. **Снимки цен:** Товары заказа сохраняют цену на момент создания заказа
+3. **Статистика пользователя:** Обновляется автоматически при создании/отмене заказа
+4. **Управление адресами:** Поддержка нескольких адресов с флагом по умолчанию
+5. **Категории тикетов:** Можно связать тикеты с конкретными заказами через `relatedOrderId`
+6. **Атрибуты товаров:** Должны соответствовать схеме подкатегории (определено в enums)
+7. **Отмена заказа:** Пользователь не может отменить после статуса "in_delivery"
+8. **Сообщения тикетов:** Пользователь и поддержка могут добавлять сообщения
+9. **Swagger Docs:** Доступен на `/docs` для интерактивного тестирования API
 
 ---
 
-## Common Frontend Use Cases
+## Частые случаи использования Frontend
 
-### Add to Cart with Attributes
+### Добавить в корзину с атрибутами
 ```javascript
-// Example: Add iPhone with color attribute
+// Пример: Добавить iPhone с атрибутом цвета
 POST /api/public/cart
 {
   productId: "...",
@@ -784,9 +788,9 @@ POST /api/public/cart
 }
 ```
 
-### Create Order
+### Создать заказ
 ```javascript
-// First ensure cart has items, then
+// Сначала убедитесь что в корзине есть товары, затем
 POST /api/public/orders
 {
   deliveryAddress: {
@@ -800,20 +804,19 @@ POST /api/public/orders
 }
 ```
 
-### Order Status Display
+### Отображение статуса заказа
 ```javascript
 const STATUS_LABELS = {
-  created: "Order Created",
-  accepted_by_moderator: "Accepted by Moderator",
-  packed: "Packed",
-  assigned_to_courier: "Assigned to Courier",
-  in_delivery: "In Delivery",
-  delivered: "Delivered",
-  canceled: "Canceled"
+  created: "Заказ создан",
+  accepted_by_moderator: "Принят модератором",
+  packed: "Упакован",
+  assigned_to_courier: "Назначен курьеру",
+  in_delivery: "В доставке",
+  delivered: "Доставлен",
+  canceled: "Отменен"
 };
 ```
 
-### Ticket Priority Levels
+### Уровни приоритета тикетов
 ```javascript
 const PRIORITY_LEVELS = ["low", "medium", "high", "urgent"];
-```

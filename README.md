@@ -305,7 +305,7 @@ open → assigned → resolved → closed
 
 - **JWT-аутентификация** — токены в cookies и заголовках
 - **Helmet** — заголовки безопасности
-- **CORS** — настроен для localhost:5173
+- **CORS** — настроен для своего frontedn
 - **Rate Limiting** — защита от DDoS
 - **Валидация** — express-validator для всех входящих данных
 - **bcrypt** — хеширование паролей
