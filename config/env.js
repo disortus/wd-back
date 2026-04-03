@@ -12,7 +12,22 @@ export const JWT_EXPIRE = process.env.JWT_EXPIRE;
 
 // Original admin
 export const ORIGINAL_ADMIN_FULLNAME = process.env.ORIGINAL_ADMIN_FULLNAME;
-export const ORIGINAL_ADMIN_EMAIL = process.env.ORIGINAL_ADMIN_EMAIL;
+export const ORIGINAL_ADMIN_PHONE = process.env.ORIGINAL_ADMIN_PHONE;
 export const ORIGINAL_ADMIN_PASSWORD = process.env.ORIGINAL_ADMIN_PASSWORD;
+
+// Default staff - Moderator
+export const ORIGINAL_MODERATOR_FULLNAME = process.env.ORIGINAL_MODERATOR_FULLNAME;
+export const ORIGINAL_MODERATOR_PHONE = process.env.ORIGINAL_MODERATOR_PHONE;
+export const ORIGINAL_MODERATOR_PASSWORD = process.env.ORIGINAL_MODERATOR_PASSWORD;
+
+// Default staff - Courier
+export const ORIGINAL_COURIER_FULLNAME = process.env.ORIGINAL_COURIER_FULLNAME;
+export const ORIGINAL_COURIER_PHONE = process.env.ORIGINAL_COURIER_PHONE;
+export const ORIGINAL_COURIER_PASSWORD = process.env.ORIGINAL_COURIER_PASSWORD;
+
+// Default staff - Support
+export const ORIGINAL_SUPPORT_FULLNAME = process.env.ORIGINAL_SUPPORT_FULLNAME;
+export const ORIGINAL_SUPPORT_PHONE = process.env.ORIGINAL_SUPPORT_PHONE;
+export const ORIGINAL_SUPPORT_PASSWORD = process.env.ORIGINAL_SUPPORT_PASSWORD;
 
 // TODO: integrate envalide and validate env varialbles

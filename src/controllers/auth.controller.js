@@ -6,12 +6,12 @@ import { AppError } from "../utils/app-errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const register = asyncHandler(async (req, res) => {
-    const { fullname, email, password, phone } = req.body;
+    const { fullname, phone, password } = req.body;
 
-    const exists = await User.findOne({ email });
+    const exists = await User.findOne({ phone });
 
     if (exists) {
-        throw new AppError(400, "Email already exists");
+        throw new AppError(400, "Phone already exists");
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -19,9 +19,8 @@ export const register = asyncHandler(async (req, res) => {
 
     const user = await User.create({
         fullname,
-        email,
-        passwordHash,
         phone,
+        passwordHash,
         role: USER_ROLE_TYPES.USER,
     });
 
@@ -44,7 +43,7 @@ export const register = asyncHandler(async (req, res) => {
             user: {
                 id: user._id,
                 fullname: user.fullname,
-                email: user.email,
+                phone: user.phone,
                 role: user.role,
             },
             token,
@@ -53,9 +52,9 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ phone });
 
     if (!user) {
         throw new AppError(400, "Invalid credentials");
@@ -69,7 +68,7 @@ export const login = asyncHandler(async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
-        throw new AppError(400, "Invalid email or password");
+        throw new AppError(400, "Invalid phone or password");
     }
 
     // Update last login
@@ -92,7 +91,7 @@ export const login = asyncHandler(async (req, res) => {
             user: {
                 id: user._id,
                 fullname: user.fullname,
-                email: user.email,
+                phone: user.phone,
                 role: user.role
             },
             token

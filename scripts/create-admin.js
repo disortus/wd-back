@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import User from "../src/models/User.js";
 import { USER_ROLE_TYPES } from "../src/utils/enums.js";
 import { MONGO_URI, 
-    ORIGINAL_ADMIN_FULLNAME, ORIGINAL_ADMIN_EMAIL, ORIGINAL_ADMIN_PASSWORD
+    ORIGINAL_ADMIN_FULLNAME, ORIGINAL_ADMIN_PHONE, ORIGINAL_ADMIN_PASSWORD
  } from "../config/env.js";
 
 async function connectDB() {
@@ -18,7 +18,7 @@ async function connectDB() {
 
 async function cretaeOriginalAdmin() {
     try {
-        const exists = await User.findOne({ email: ORIGINAL_ADMIN_EMAIL});
+        const exists = await User.findOne({ phone: ORIGINAL_ADMIN_PHONE });
 
         if (exists) {
             console.log("⚠️ Original admin already exists");
@@ -31,7 +31,7 @@ async function cretaeOriginalAdmin() {
         // Original Admin
         await User.create({
             fullname: ORIGINAL_ADMIN_FULLNAME,
-            email: ORIGINAL_ADMIN_EMAIL,
+            phone: ORIGINAL_ADMIN_PHONE,
             passwordHash: originalAdminPasswordHash,
             role: USER_ROLE_TYPES.ADMIN
         });

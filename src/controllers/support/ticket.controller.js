@@ -18,7 +18,7 @@ export const getOpenTickets = asyncHandler(async (req, res) => {
     }
 
     const tickets = await SupportTicket.find(query)
-        .populate("user", "fullname email phone")
+        .populate("user", "fullname phone")
         .sort({ priority: -1, createdAt: 1 }) // High priority first, then oldest
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
@@ -48,7 +48,7 @@ export const getMyTickets = asyncHandler(async (req, res) => {
     }
 
     const tickets = await SupportTicket.find(query)
-        .populate("user", "fullname email phone")
+        .populate("user", "fullname phone")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
@@ -70,8 +70,8 @@ export const getMyTickets = asyncHandler(async (req, res) => {
 // Get single ticket
 export const getTicket = asyncHandler(async (req, res) => {
     const ticket = await SupportTicket.findById(req.params.id)
-        .populate("user", "fullname email phone")
-        .populate("assignedTo", "fullname email");
+        .populate("user", "fullname phone")
+        .populate("assignedTo", "fullname phone");
 
     if (!ticket) {
         throw new AppError(404, "Ticket not found");

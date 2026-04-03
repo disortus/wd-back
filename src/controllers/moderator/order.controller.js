@@ -26,9 +26,9 @@ export const getOrders = asyncHandler(async (req, res) => {
     }
 
     const orders = await Order.find(query)
-        .populate("userId", "fullname email phone")
-        .populate("moderator", "fullname email")
-        .populate("courier", "fullname email phone")
+        .populate("userId", "fullname phone")
+        .populate("moderator", "fullname phone")
+        .populate("courier", "fullname phone")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
@@ -50,9 +50,9 @@ export const getOrders = asyncHandler(async (req, res) => {
 // Get single order
 export const getOrder = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id)
-        .populate("userId", "fullname email phone")
-        .populate("moderator", "fullname email")
-        .populate("courier", "fullname email phone");
+        .populate("userId", "fullname phone")
+        .populate("moderator", "fullname phone")
+        .populate("courier", "fullname phone");
 
     if (!order) {
         throw new AppError(404, "Order not found");

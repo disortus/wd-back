@@ -8,12 +8,6 @@ const userSchema = new mongoose.Schema({
         trim: true
     },
 
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-
     passwordHash: {
         type: String,
         required: true
@@ -21,7 +15,8 @@ const userSchema = new mongoose.Schema({
 
     phone: {
         type: String,
-        default: ""
+        required: true,
+        unique: true
     },
 
     role: {
@@ -169,7 +164,6 @@ userSchema.methods.getPublicProfile = function() {
     return {
         id: this._id,
         fullname: this.fullname,
-        email: this.email,
         phone: this.phone,
         role: this.role,
         avatar: this.profile?.avatar || "",
@@ -182,7 +176,6 @@ userSchema.methods.getFullProfile = function() {
     return {
         id: this._id,
         fullname: this.fullname,
-        email: this.email,
         phone: this.phone,
         role: this.role,
         profile: this.profile,
@@ -212,7 +205,7 @@ userSchema.statics.getAvailableStaff = function(roles) {
     return this.find({ 
         role: { $in: roles }, 
         isActive: true 
-    }).select("_id fullname email role");
+    }).select("_id fullname phone role");
 };
 
 export default mongoose.model(DB_MODELS.USER, userSchema);

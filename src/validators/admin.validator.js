@@ -5,14 +5,14 @@ export const createUserValidator = [
     body("fullname")
         .isLength({ min: 2 }).withMessage("name too short"),
     
-    body("email")
-        .isEmail().withMessage("invalid email format"),
+    body("phone")
+        .isMobilePhone("kk-KZ").withMessage("invalid phone number format"),
     
     body("role")
         .isIn(USER_ROLE_TYPES_LIST).withMessage("invalid role type"),
     
-    body("phone")
-        .isMobilePhone("kk-KZ").withMessage("invalid phone number format")
+    body("password")
+        .isLength({ min: 6 }).withMessage("password must be 6 characters at least")
 ];
 
 export const updateUserValidator = [

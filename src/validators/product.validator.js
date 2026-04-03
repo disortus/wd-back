@@ -23,6 +23,7 @@ export const createProductValidator = [
         .isObject(),
     
     body("category_id")
+        .optional()
         .isMongoId().withMessage("invalid id format"),
     
     body("description")

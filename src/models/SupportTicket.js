@@ -42,8 +42,7 @@ const ticketSchema = new mongoose.Schema({
 
     userSnapshot: {
         fullname: { type: String, required: true },
-        email: { type: String, required: true },
-        phone: { type: String, default: "" }
+        phone: { type: String, required: true }
     },
 
     subject: {
@@ -84,7 +83,7 @@ const ticketSchema = new mongoose.Schema({
 
     assignedToSnapshot: {
         fullname: { type: String, default: "" },
-        email: { type: String, default: "" }
+        phone: { type: String, default: "" }
     },
 
     assignedAt: {
@@ -175,7 +174,7 @@ ticketSchema.methods.assignTo = function(agent) {
     this.assignedTo = agent._id;
     this.assignedToSnapshot = {
         fullname: agent.fullname,
-        email: agent.email
+        phone: agent.phone
     };
     this.assignedAt = new Date();
     this.status = TICKET_STATUS_TYPES.ASSIGNED;
@@ -187,7 +186,7 @@ ticketSchema.methods.release = function() {
     this.assignedTo = null;
     this.assignedToSnapshot = {
         fullname: "",
-        email: ""
+        phone: ""
     };
     this.assignedAt = null;
     this.status = TICKET_STATUS_TYPES.OPEN;

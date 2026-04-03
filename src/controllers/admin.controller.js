@@ -4,12 +4,12 @@ import { AppError } from "../utils/app-errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const createUser = asyncHandler(async (req, res) => {
-    const { fullname, email, password, role, phone } = req.body;
+    const { fullname, phone, password, role } = req.body;
 
-    const exists = await User.findOne({ email });
+    const exists = await User.findOne({ phone });
 
     if (exists) {
-        throw new AppError(400, "email already in use");
+        throw new AppError(400, "phone already in use");
     }
 
     const salt = await genSalt(10);
@@ -17,10 +17,9 @@ export const createUser = asyncHandler(async (req, res) => {
 
     const user = await User.create({
         fullname,
-        email,
+        phone,
         passwordHash,
-        role,
-        phone
+        role
     });
 
     res.status(201).json({
@@ -28,9 +27,8 @@ export const createUser = asyncHandler(async (req, res) => {
         data: {
             id: user._id,
             fullname: user.fullname,
-            email: user.email,
-            role: user.role,
-            phone: user.phone
+            phone: user.phone,
+            role: user.role
         }
     });
 });

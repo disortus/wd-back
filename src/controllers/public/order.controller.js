@@ -55,8 +55,7 @@ export const createOrder = asyncHandler(async (req, res) => {
         userId: user._id,
         userSnapshot: {
             fullname: user.fullname,
-            email: user.email,
-            phone: user.phone || ""
+            phone: user.phone
         },
         items: orderItems,
         totalPrice,
@@ -130,8 +129,8 @@ export const getMyOrder = asyncHandler(async (req, res) => {
     const order = await Order.findOne({
         _id: req.params.id,
         userId: req.auth.id
-    }).populate("moderator", "fullname email")
-      .populate("courier", "fullname email phone");
+    }).populate("moderator", "fullname phone")
+      .populate("courier", "fullname phone");
 
     if (!order) {
         throw new AppError(404, "Order not found");

@@ -85,8 +85,7 @@ const orderSchema = new mongoose.Schema({
 
     userSnapshot: {
         fullname: { type: String, required: true },
-        email: { type: String, required: true },
-        phone: { type: String, default: "" }
+        phone: { type: String, required: true }
     },
 
     items: {

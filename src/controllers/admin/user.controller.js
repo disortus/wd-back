@@ -16,7 +16,7 @@ export const getUsers = asyncHandler(async (req, res) => {
     if (search) {
         query.$or = [
             { fullname: { $regex: search, $options: "i" } },
-            { email: { $regex: search, $options: "i" } }
+            { phone: { $regex: search, $options: "i" } }
         ];
     }
 
@@ -56,10 +56,10 @@ export const getUser = asyncHandler(async (req, res) => {
 
 // Create new staff user
 export const createUser = asyncHandler(async (req, res) => {
-    const { fullname, email, password, phone, role } = req.body;
+    const { fullname, phone, password, role } = req.body;
 
-    if (!fullname || !email || !password || !role) {
-        throw new AppError(400, "Fullname, email, password and role are required");
+    if (!fullname || !phone || !password || !role) {
+        throw new AppError(400, "Fullname, phone, password and role are required");
     }
 
     if (!USER_ROLE_TYPES_LIST.includes(role)) {
@@ -71,9 +71,9 @@ export const createUser = asyncHandler(async (req, res) => {
         throw new AppError(403, "Only admins can create admin users");
     }
 
-    const exists = await User.findOne({ email });
+    const exists = await User.findOne({ phone });
     if (exists) {
-        throw new AppError(400, "Email already exists");
+        throw new AppError(400, "Phone already exists");
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -81,9 +81,8 @@ export const createUser = asyncHandler(async (req, res) => {
 
     const user = await User.create({
         fullname,
-        email,
+        phone,
         passwordHash,
-        phone: phone || "",
         role,
         staffInfo: {
             hireDate: new Date()
@@ -95,7 +94,7 @@ export const createUser = asyncHandler(async (req, res) => {
         data: {
             id: user._id,
             fullname: user.fullname,
-            email: user.email,
+            phone: user.phone,
             role: user.role,
             createdAt: user.createdAt
         }
@@ -196,7 +195,7 @@ export const toggleUserActive = asyncHandler(async (req, res) => {
         data: {
             id: user._id,
             fullname: user.fullname,
-            email: user.email,
+            phone: user.phone,
             role: user.role,
             isActive: user.isActive
         }
@@ -235,7 +234,7 @@ export const getUsersByRole = asyncHandler(async (req, res) => {
     }
 
     const users = await User.find({ role, isActive: true })
-        .select("_id fullname email phone")
+        .select("_id fullname phone")
         .sort({ fullname: 1 });
 
     res.json({

@@ -30,8 +30,7 @@ export const createTicket = asyncHandler(async (req, res) => {
         user: req.auth.id,
         userSnapshot: {
             fullname: req.user.fullname,
-            email: req.user.email,
-            phone: req.user.phone || ""
+            phone: req.user.phone
         },
         subject,
         description,

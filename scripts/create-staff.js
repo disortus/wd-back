@@ -1,74 +1,90 @@
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import dotenv from "dotenv";
-import { connectDB } from "../config/db.js";
+import mongoose from "mongoose";
 import User from "../src/models/User.js";
 import { USER_ROLE_TYPES } from "../src/utils/enums.js";
+import { 
+    MONGO_URI,
+    ORIGINAL_MODERATOR_FULLNAME, ORIGINAL_MODERATOR_PHONE, ORIGINAL_MODERATOR_PASSWORD,
+    ORIGINAL_COURIER_FULLNAME, ORIGINAL_COURIER_PHONE, ORIGINAL_COURIER_PASSWORD,
+    ORIGINAL_SUPPORT_FULLNAME, ORIGINAL_SUPPORT_PHONE, ORIGINAL_SUPPORT_PASSWORD
+} from "../config/env.js";
 
-dotenv.config();
-
-const createStaff = async () => {
+async function connectDB() {
     try {
-        await connectDB();
-        console.log("📦 Connected to database");
+        await mongoose.connect(MONGO_URI);
+        console.log("✅ MongoDB connected");
+    } catch (err) {
+        console.log("❌ MongoDB connection failed", err.message);
+        process.exit(1);
+    }
+}
 
-        const args = process.argv.slice(2);
-        
-        if (args.length < 4) {
-            console.log("\n❌ Usage: node create-staff.js <email> <password> <role> <fullname>");
-            console.log("\nAvailable roles:");
-            console.log("  - moderator");
-            console.log("  - courier");
-            console.log("  - support");
-            console.log("  - admin");
-            console.log("\nExample:");
-            console.log("  node create-staff.js admin@example.com password123 admin \"Admin User\"");
-            process.exit(1);
+async function createStaffUser(fullname, phone, password, role) {
+    try {
+        const exists = await User.findOne({ phone });
+
+        if (exists) {
+            console.log(`⚠️ ${role} (${phone}) already exists`);
+            return false;
         }
 
-        const [email, password, role, fullname] = args;
-
-        // Validate role
-        const validRoles = Object.values(USER_ROLE_TYPES);
-        if (!validRoles.includes(role)) {
-            console.log(`\n❌ Invalid role: ${role}`);
-            console.log("Valid roles:", validRoles.join(", "));
-            process.exit(1);
-        }
-
-        // Check if user exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            console.log(`\n❌ User with email ${email} already exists`);
-            process.exit(1);
-        }
-
-        // Create user
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        const user = await User.create({
+        await User.create({
             fullname,
-            email,
+            phone,
             passwordHash,
-            phone: "",
             role,
             staffInfo: {
                 hireDate: new Date()
             }
         });
 
-        console.log(`\n✅ Staff user created successfully!`);
-        console.log(`   ID: ${user._id}`);
-        console.log(`   Email: ${user.email}`);
-        console.log(`   Role: ${user.role}`);
-        console.log(`   Fullname: ${user.fullname}`);
-
-        process.exit(0);
-    } catch (error) {
-        console.error("❌ Error creating staff:", error);
-        process.exit(1);
+        console.log(`✅ ${role} created: ${fullname} (${phone})`);
+        return true;
+    } catch (err) {
+        console.log(`❌ Failed to create ${role}:`, err.message);
+        return false;
     }
+}
+
+async function createAllStaff() {
+    console.log("\n📦 Creating default staff users...\n");
+    
+    // Create Moderator
+    await createStaffUser(
+        ORIGINAL_MODERATOR_FULLNAME,
+        ORIGINAL_MODERATOR_PHONE,
+        ORIGINAL_MODERATOR_PASSWORD,
+        USER_ROLE_TYPES.MODERATOR
+    );
+
+    // Create Courier
+    await createStaffUser(
+        ORIGINAL_COURIER_FULLNAME,
+        ORIGINAL_COURIER_PHONE,
+        ORIGINAL_COURIER_PASSWORD,
+        USER_ROLE_TYPES.COURIER
+    );
+
+    // Create Support
+    await createStaffUser(
+        ORIGINAL_SUPPORT_FULLNAME,
+        ORIGINAL_SUPPORT_PHONE,
+        ORIGINAL_SUPPORT_PASSWORD,
+        USER_ROLE_TYPES.SUPPORT
+    );
+
+    console.log("\n✅ All staff users created!");
+    process.exit();
+}
+
+const startScript = async () => {
+    console.log("🚀 Staff creation script started");
+
+    await connectDB();
+    await createAllStaff();
 };
 
-createStaff();
+startScript();
