@@ -6,36 +6,101 @@ import { asyncHandler } from "../../utils/async-handler.js";
 
 // Get all users
 export const getUsers = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 20, role, search } = req.query;
+
+    const {
+        page = "1",
+        limit = "20",
+        role,
+        search
+    } = req.query;
+
+
+    const pageNumber =
+        Number(page) || 1;
+
+    const limitNumber =
+        Number(limit) || 20;
+
 
     const query = {};
+
+
     if (role) {
+
         query.role = role;
+
     }
+
 
     if (search) {
+
         query.$or = [
-            { fullname: { $regex: search, $options: "i" } },
-            { phone: { $regex: search, $options: "i" } }
+
+            {
+                fullname: {
+                    $regex: search,
+                    $options: "i"
+                }
+            },
+
+            {
+                phone: {
+                    $regex: search,
+                    $options: "i"
+                }
+            }
+
         ];
+
     }
 
-    const users = await User.find(query)
-        .select("-passwordHash")
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(parseInt(limit));
 
-    const total = await User.countDocuments(query);
+    const users =
+        await User
+            .find(query)
+
+            .select("-passwordHash")
+
+            .sort({
+                createdAt: -1
+            })
+
+            .skip(
+                (pageNumber - 1) *
+                limitNumber
+            )
+
+            .limit(
+                limitNumber
+            )
+
+            .lean();
+
+
+    const total =
+        await User
+            .countDocuments(query);
+
 
     res.json({
+
         ok: true,
+
         data: users,
+
         pagination: {
-            page: parseInt(page),
-            limit: parseInt(limit),
+
+            page: pageNumber,
+
+            limit: limitNumber,
+
             total,
-            pages: Math.ceil(total / limit)
+
+            pages:
+                Math.ceil(
+                    total /
+                    limitNumber
+                )
         }
     });
 });
@@ -234,8 +299,7 @@ export const getUsersByRole = asyncHandler(async (req, res) => {
     }
 
     const users = await User.find({ role, isActive: true })
-        .select("_id fullname phone")
-        .sort({ fullname: 1 });
+        .select("_id fullname phone");
 
     res.json({
         ok: true,
@@ -255,7 +319,6 @@ export const getUserStats = asyncHandler(async (req, res) => {
 
     const recentUsers = await User.find()
         .select("-passwordHash")
-        .sort({ createdAt: -1 })
         .limit(5);
 
     res.json({

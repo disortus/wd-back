@@ -34,7 +34,10 @@ export const createUser = asyncHandler(async (req, res) => {
 });
 
 export const getUsers = asyncHandler(async (req, res) => {
-    const users = (await User.find().select("-passwordHash")).sort({ createdAt: -1 });
+    const users = await User.find()
+        .select("-passwordHash")
+        .sort({ createdAt: -1 })
+        .exec();
 
     res.json({
         ok: true,

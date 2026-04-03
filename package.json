@@ -8,6 +8,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed-catalog": "node scripts/seed-catalog.js",
+    "seed-product": "node scripts/product-seed/index.js",
     "create-admin": "node scripts/create-admin.js",
     "delete-admin": "node scripts/delete-admin.js",
     "create-staff": "node scripts/create-staff.js"

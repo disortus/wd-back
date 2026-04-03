@@ -322,6 +322,35 @@ async function runTest() {
   }
 
   // ============================================================
+  // STEP 4.1: Test Product Update with Images
+  // ============================================================
+  logSection("STEP 4.1: Test Product Update with Images");
+
+  if (productIds.length > 0) {
+    const testProductId = productIds[0];
+    
+    // Test updating product with new images and description
+    log("  Updating product with new images and description...", "yellow");
+    const updateResult = await apiRequest("PATCH", `/admin/products/${testProductId}`, {
+      description: "Updated description with more details",
+      images: [
+        "https://example.com/updated-image1.jpg",
+        "https://example.com/updated-image2.jpg"
+      ],
+      mainImage: "https://example.com/updated-image1.jpg",
+      price: 609990 // Also update price
+    }, tokens.admin);
+    
+    log(`  ${updateResult.success ? "✅" : "❌"} Product update with images: ${updateResult.success ? "success" : "failed"}`, updateResult.success ? "green" : "red");
+    
+    if (updateResult.success && updateResult.data.data) {
+      const updatedProduct = updateResult.data.data;
+      log(`     Images count: ${updatedProduct.images?.length || 0}`, "yellow");
+      log(`     Description length: ${updatedProduct.description?.length || 0}`, "yellow");
+    }
+  }
+
+  // ============================================================
   // STEP 4.5: Test Admin Stock Management
   // ============================================================
   logSection("STEP 4.5: Test Admin Stock Management");
@@ -458,12 +487,12 @@ async function runTest() {
 
     // Accept order
     log("  Accepting order...", "yellow");
-    await apiRequest("PUT", `/moderator/orders/${orderId}/accept`, null, tokens.moderator);
+    await apiRequest("POST", `/moderator/orders/${orderId}/accept`, null, tokens.moderator);
     log("  ✅ Order accepted", "green");
 
     // Pack order
     log("  Packing order...", "yellow");
-    await apiRequest("PUT", `/moderator/orders/${orderId}/pack`, null, tokens.moderator);
+    await apiRequest("POST", `/moderator/orders/${orderId}/pack`, null, tokens.moderator);
     log("  ✅ Order packed", "green");
 
     // Get couriers
@@ -473,9 +502,11 @@ async function runTest() {
     if (couriers.success && couriers.data.data && couriers.data.data.length > 0) {
       const courierId = couriers.data.data[0]._id;
       log(`  📦 Assigning order to courier: ${couriers.data.data[0].fullname}`, "yellow");
-      await apiRequest("PUT", `/moderator/orders/${orderId}/assign`, { courierId }, tokens.moderator);
+      await apiRequest("POST", `/moderator/orders/${orderId}/assign`, { courierId }, tokens.moderator);
       log("  ✅ Order assigned to courier", "green");
     }
+  } else {
+    log("  ⚠️ No pending orders to process", "yellow");
   }
 
   // ============================================================

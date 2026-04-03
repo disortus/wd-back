@@ -3,7 +3,7 @@ import { CATEGORY_TYPES_LIST, SUBCATEGORY_TYPES_LIST } from "../utils/enums.js";
 
 export const createProductValidator = [
     body("title")
-        .isLength({ min: 3 }).withMessage(" title too short"),
+        .isLength({ min: 3 }).withMessage("title too short"),
 
     body("categorySlug")
         .isIn(CATEGORY_TYPES_LIST).withMessage("invalid category type"),
@@ -20,18 +20,19 @@ export const createProductValidator = [
     
     body("attributes")
         .optional()
-        .isObject(),
-    
-    body("category_id")
-        .optional()
-        .isMongoId().withMessage("invalid id format"),
+        .isObject().withMessage("attributes must be an object"),
     
     body("description")
-        .optional(),
-    
-    body("image")
         .optional()
-        .isArray()
+        .isString().withMessage("description must be a string"),
+    
+    body("images")
+        .optional()
+        .isArray().withMessage("images must be an array"),
+    
+    body("mainImage")
+        .optional()
+        .isString().withMessage("mainImage must be a string")
 ];
 
 export const updateProductValidator = [
@@ -48,7 +49,23 @@ export const updateProductValidator = [
 
     body("stock")
         .optional()
-        .isInt({ min: 0 }).withMessage("stock can't be less than 0")
+        .isInt({ min: 0 }).withMessage("stock can't be less than 0"),
+
+    body("images")
+        .optional()
+        .isArray().withMessage("images must be an array"),
+    
+    body("mainImage")
+        .optional()
+        .isString().withMessage("mainImage must be a string"),
+    
+    body("attributes")
+        .optional()
+        .isObject().withMessage("attributes must be an object"),
+    
+    body("description")
+        .optional()
+        .isString().withMessage("description must be a string")
 ];
 
 export const queryProductsValidator = [

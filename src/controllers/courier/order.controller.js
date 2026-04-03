@@ -8,17 +8,26 @@ import { asyncHandler } from "../../utils/async-handler.js";
 export const getAvailableOrders = asyncHandler(async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
 
+    // Show orders that are ready for delivery:
+    // 1. Packed orders (not yet assigned to any courier)
+    // 2. Assigned to courier orders (for any courier - can be reassigned)
     const orders = await Order.find({
-        status: ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER,
-        courier: null })
+        $or: [
+            { status: ORDER_STATUS_TYPES.PACKED },
+            { status: ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER }
+        ]
+    })
         .populate("userId", "fullname phone")
+        .populate("moderator", "fullname phone")
         .sort({ createdAt: 1 }) // Oldest first (FIFO)
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
 
     const total = await Order.countDocuments({
-        status: ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER,
-        courier: null
+        $or: [
+            { status: ORDER_STATUS_TYPES.PACKED },
+            { status: ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER }
+        ]
     });
 
     res.json({
@@ -33,11 +42,12 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
     });
 });
 
-// Get my assigned orders
+// Get my assigned orders - only orders that THIS courier has accepted
 export const getMyOrders = asyncHandler(async (req, res) => {
     const { page = 1, limit = 20, status } = req.query;
 
-    const query = { courier: req.auth.id };
+    // My orders = orders where this courier is assigned
+    let query = { courier: req.auth.id };
 
     if (status) {
         query.status = status;
@@ -88,20 +98,26 @@ export const acceptOrder = asyncHandler(async (req, res) => {
         throw new AppError(404, "Order not found");
     }
 
-    if (order.status !== ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER) {
+    // Can accept packed or assigned_to_courier orders
+    if (order.status !== ORDER_STATUS_TYPES.PACKED && 
+        order.status !== ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER) {
         throw new AppError(400, "Order is not available for acceptance");
     }
 
+    // If another courier already accepted it, reject
     if (order.courier && order.courier.toString() !== req.auth.id) {
         throw new AppError(400, "Order already accepted by another courier");
     }
 
+    // Assign this courier and set status to assigned_to_courier
     order.courier = req.auth.id;
+    order.status = ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER;
+
     order.statusHistory.push({
-        status: order.status,
+        status: ORDER_STATUS_TYPES.ASSIGNED_TO_COURIER,
         changedAt: new Date(),
         changedBy: req.auth.id,
-        note: `Accepted by courier: ${req.user.fullname}`
+        note: "Accepted by courier"
     });
 
     await order.save();
