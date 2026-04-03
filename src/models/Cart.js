@@ -82,10 +82,18 @@ const cartSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Update totals before saving
-cartSchema.pre("save", function(next) {
-    this.totalItems = this.items.reduce((sum, item) => sum + item.quantity, 0);
-    this.subtotal = this.items.reduce((sum, item) => sum + (item.priceSnapshot * item.quantity), 0);
-    next();
+cartSchema.pre("save", function() {
+
+    this.totalItems = this.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+    );
+
+    this.subtotal = this.items.reduce(
+        (sum, item) => sum + item.priceSnapshot * item.quantity,
+        0
+    );
+
 });
 
 // Method to recalculate cart totals

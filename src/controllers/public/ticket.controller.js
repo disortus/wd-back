@@ -5,45 +5,46 @@ import { AppError } from "../../utils/app-errors.js";
 import { asyncHandler } from "../../utils/async-handler.js";
 
 // Create support ticket
+import User from "../../models/User.js";
+
 export const createTicket = asyncHandler(async (req, res) => {
-    const { subject, description, category = "other", priority = "medium", relatedOrderId } = req.body;
+    const {
+        subject,
+        description,
+        category = "other",
+        priority = "medium",
+        relatedOrderId
+    } = req.body;
 
-    if (!subject || !description) {
-        throw new AppError(400, "Subject and description are required");
-    }
-
-    // Verify order if provided
     if (relatedOrderId) {
         const order = await Order.findOne({
             _id: relatedOrderId,
             userId: req.auth.id
         });
+
         if (!order) {
             throw new AppError(404, "Order not found");
         }
     }
 
-    // TODO: why user const don't in use
-    const user = await req.user.populate("userId");
+    const user = await User.findById(req.auth.id).select("fullname phone");
+
+    if (!user) {
+        throw new AppError(404, "User not found");
+    }
 
     const ticket = await SupportTicket.create({
         user: req.auth.id,
         userSnapshot: {
-            fullname: req.user.fullname,
-            phone: req.user.phone
+            fullname: user.fullname,
+            phone: user.phone
         },
         subject,
         description,
         category,
         priority,
-        relatedOrder: relatedOrderId || null,
-        status: TICKET_STATUS_TYPES.OPEN,
-        statusHistory: [{
-            status: TICKET_STATUS_TYPES.OPEN,
-            changedAt: new Date(),
-            changedBy: req.auth.id,
-            note: "Ticket created"
-        }]
+        relatedOrder:
+            relatedOrderId || null
     });
 
     res.status(201).json({

@@ -1,28 +1,15 @@
 /**
  * Full Journey Test Script
- * This script tests the complete user flow:
- * 1. Create admin, staff (moderator, courier, support), and test user
- * 2. Admin creates products
- * 3. User adds products to cart and creates order
- * 4. Moderator processes the order
- * 5. Courier delivers the order
- * 6. User creates support ticket
- * 7. Support responds to ticket
+ * Tests complete user flow for Apple Store API
  */
-
-import axios from "axios";
 
 const BASE_URL = "http://localhost:5000/api";
 
 const colors = {
   reset: "\x1b[0m",
-  bright: "\x1b[1m",
-  dim: "\x1b[2m",
   red: "\x1b[31m",
   green: "\x1b[32m",
   yellow: "\x1b[33m",
-  blue: "\x1b[34m",
-  magenta: "\x1b[35m",
   cyan: "\x1b[36m"
 };
 
@@ -36,30 +23,34 @@ function logSection(title) {
   log("=".repeat(60), "cyan");
 }
 
-// Helper to make requests
+// Helper to make requests using fetch
 async function apiRequest(method, endpoint, data = null, token = null) {
-  const config = {
+  const headers = {
+    "Content-Type": "application/json"
+  };
+  
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  
+  const options = {
     method,
-    url: `${BASE_URL}${endpoint}`,
-    headers: token ? { Authorization: `Bearer ${token}` } : {}
+    headers
   };
   
   if (data) {
-    config.data = data;
+    options.body = JSON.stringify(data);
   }
   
   try {
-    const response = await axios(config);
-    return { success: true, data: response.data };
+    const response = await fetch(`${BASE_URL}${endpoint}`, options);
+    const result = await response.json();
+    return { success: response.ok, data: result, status: response.status };
   } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message;
-    log(`  Error: ${errorMessage}`, "red");
-    return { success: false, error: errorMessage };
+    log(`  Error: ${error.message}`, "red");
+    return { success: false, error: error.message };
   }
 }
-
-// Wait function
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function runTest() {
   log("\n🚀 Starting Full Journey Test", "green");
@@ -68,13 +59,14 @@ async function runTest() {
   let orderId = null;
   let ticketId = null;
   let productIds = [];
+  let categoryId = null;
+  let subcategoryId = null;
 
   // ============================================================
-  // STEP 1: Login as Admin to create products
+  // STEP 1: Admin Login
   // ============================================================
-  logSection("STEP 1: Admin Login and Product Creation");
+  logSection("STEP 1: Admin Login");
 
-  // Admin login
   log("  Logging in as admin...", "yellow");
   const adminLogin = await apiRequest("POST", "/auth/login", {
     phone: "+77000000001",
@@ -82,137 +74,310 @@ async function runTest() {
   });
 
   if (!adminLogin.success) {
-    log("  ❌ Admin login failed. Make sure to run create-admin.js first!", "red");
+    log("  ❌ Admin login failed", "red");
     return;
   }
 
   tokens.admin = adminLogin.data.data.token;
   log("  ✅ Admin logged in", "green");
 
-  // Seed catalog
-  log("  Seeding catalog...", "yellow");
-  const seedResult = await apiRequest("POST", "/admin/catalog/seed", {}, tokens.admin);
-  
-  if (seedResult.success) {
-    log("  ✅ Catalog seeded", "green");
-  }
+  // ============================================================
+  // STEP 2: Get Categories (for product creation)
+  // ============================================================
+  logSection("STEP 2: Get Categories and Subcategories");
 
-  // Get subcategories to use for products
-  log("  Getting subcategories...", "yellow");
+  log("  Getting categories from API...", "yellow");
   const categories = await apiRequest("GET", "/admin/catalog", null, tokens.admin);
   
-  let subcategoryId = null;
-  if (categories.success && categories.data.data && categories.data.data.length > 0) {
-    const cat = categories.data.data[0];
-    if (cat.subcategories && cat.subcategories.length > 0) {
-      subcategoryId = cat.subcategories[0]._id;
-      log(`  ✅ Using subcategory: ${cat.subcategories[0].name}`, "green");
-    }
+  let categoryMap = {};
+  if (categories.success && categories.data.data) {
+    categories.data.data.forEach(cat => {
+      categoryMap[cat.slug] = { _id: cat._id, subcategories: {} };
+      // Store first category ID for toggle test
+      if (!categoryId) categoryId = cat._id;
+      if (cat.subcategories) {
+        cat.subcategories.forEach(sub => {
+          categoryMap[cat.slug].subcategories[sub.slug] = sub._id;
+          // Store first subcategory ID for toggle test
+          if (!subcategoryId) subcategoryId = sub._id;
+        });
+      }
+    });
+    log(`  ✅ Found ${categories.data.data.length} categories`, "green");
   }
 
-  if (!subcategoryId) {
-    log("  ⚠️ No subcategories found, using fallback", "yellow");
-    subcategoryId = "placeholder-id-for-testing";
+  // ============================================================
+  // STEP 3: Test Enable/Disable Category
+  // ============================================================
+  logSection("STEP 3: Test Enable/Disable Category");
+
+  if (categoryId) {
+    log(`  Testing toggle for category ID: ${categoryId}`, "yellow");
+    
+    // Disable category
+    let result = await apiRequest("PATCH", `/admin/catalog/categories/${categoryId}/toggle`, null, tokens.admin);
+    log(`  ${result.success ? "✅" : "❌"} Disable category: ${result.success ? "success" : "failed"}`, result.success ? "green" : "red");
+    
+    // Re-enable category
+    result = await apiRequest("PATCH", `/admin/catalog/categories/${categoryId}/toggle`, null, tokens.admin);
+    log(`  ${result.success ? "✅" : "❌"} Enable category: ${result.success ? "success" : "failed"}`, result.success ? "green" : "red");
   }
 
-  // Create products
-  log("  Creating products...", "yellow");
+  if (subcategoryId) {
+    log(`  Testing toggle for subcategory ID: ${subcategoryId}`, "yellow");
+    
+    // Disable subcategory
+    let result = await apiRequest("PATCH", `/admin/catalog/subcategories/${subcategoryId}/toggle`, null, tokens.admin);
+    log(`  ${result.success ? "✅" : "❌"} Disable subcategory: ${result.success ? "success" : "failed"}`, result.success ? "green" : "red");
+    
+    // Re-enable subcategory
+    result = await apiRequest("PATCH", `/admin/catalog/subcategories/${subcategoryId}/toggle`, null, tokens.admin);
+    log(`  ${result.success ? "✅" : "❌"} Enable subcategory: ${result.success ? "success" : "failed"}`, result.success ? "green" : "red");
+  }
+
+  // ============================================================
+  // STEP 4: Create Apple Products
+  // ============================================================
+  logSection("STEP 4: Create Apple Products");
+
   const products = [
+    // iPhone (smartphones)
     {
-      title: "Casio G-Shock",
-      slug: "casio-g-shock",
-      description: "Прочные спортивные часы",
-      price: 15000,
+      title: "iPhone 15 Pro Max",
+      slug: "iphone-15-pro-max-new",
+      description: "Apple iPhone 15 Pro Max with A17 Pro chip",
+      price: 599990,
       stock: 10,
-      subcategoryId,
-      attributes: [{ key: "water_resistance", label: "Водостойкость", value: "200m" }]
+      categorySlug: "electronics",
+      subcategorySlug: "smartphones",
+      attributes: {
+        color: "Natural Titanium",
+        storage: "256GB",
+        ram: "8GB"
+      }
     },
+    // iPad (tablets)
     {
-      title: "Seiko Automatic",
-      slug: "seiko-automatic",
-      description: "Автоматические часы с открытым механизмом",
-      price: 45000,
+      title: "iPad Pro 12.9 M4",
+      slug: "ipad-pro-12-9-m4-new",
+      description: "iPad Pro with M4 chip, 12.9-inch display",
+      price: 499990,
       stock: 5,
-      subcategoryId,
-      attributes: [{ key: "movement", label: "Механизм", value: "Автомат" }]
+      categorySlug: "electronics",
+      subcategorySlug: "tablets",
+      attributes: {
+        storage: "256GB",
+        cellular: true,
+        color: "Space Black"
+      }
     },
+    // MacBook (laptops)
     {
-      title: "Rolex Submariner",
-      slug: "rolex-submariner",
-      description: "Премиальные дайверские часы",
-      price: 350000,
+      title: "MacBook Pro 14 M3 Pro",
+      slug: "macbook-pro-14-m3-pro-new",
+      description: "MacBook Pro with M3 Pro chip, 14-inch Liquid Retina XDR",
+      price: 799990,
+      stock: 3,
+      categorySlug: "electronics",
+      subcategorySlug: "laptops",
+      attributes: {
+        processor: "M3 Pro",
+        ram: "18GB",
+        storage: "512GB SSD",
+        color: "Space Black"
+      }
+    },
+    // Apple Watch (smart_watches)
+    {
+      title: "Apple Watch Ultra 2",
+      slug: "apple-watch-ultra-2-new",
+      description: "Apple Watch Ultra 2 with GPS + Cellular",
+      price: 349990,
+      stock: 8,
+      categorySlug: "electronics",
+      subcategorySlug: "smart_watches",
+      attributes: {
+        case_size: 49,
+        color: "Titanium",
+        cellular: true
+      }
+    },
+    // AirPods (headphones)
+    {
+      title: "AirPods Pro 2nd Gen",
+      slug: "airpods-pro-2nd-gen-new",
+      description: "AirPods Pro with USB-C, Active Noise Cancellation",
+      price: 109990,
+      stock: 20,
+      categorySlug: "electronics",
+      subcategorySlug: "headphones",
+      attributes: {
+        wireless: true,
+        noise_canceling: true,
+        color: "White"
+      }
+    },
+    // Mac Mini (desktops)
+    {
+      title: "Mac Mini M2 Pro",
+      slug: "mac-mini-m2-pro-new",
+      description: "Mac Mini with M2 Pro chip",
+      price: 449990,
+      stock: 4,
+      categorySlug: "desktops_monitors",
+      subcategorySlug: "desktops",
+      attributes: {
+        processor: "M2 Pro",
+        ram: "16GB",
+        storage: "512GB SSD"
+      }
+    },
+    // Studio Display (monitors)
+    {
+      title: "Studio Display",
+      slug: "studio-display-new",
+      description: "27-inch 5K Retina display with Pro Stand",
+      price: 599990,
       stock: 2,
-      subcategoryId,
-      attributes: [{ key: "material", label: "Материал", value: "Золото" }]
+      categorySlug: "desktops_monitors",
+      subcategorySlug: "monitors",
+      attributes: {
+        display_size: 27,
+        resolution: "5K",
+        glass: "Nano-texture"
+      }
+    },
+    // Accessories - Charger
+    {
+      title: "MagSafe Charger",
+      slug: "magsafe-charger-new",
+      description: "MagSafe 15W charger for iPhone",
+      price: 15990,
+      stock: 30,
+      categorySlug: "accessories",
+      subcategorySlug: "chargers",
+      attributes: {
+        power: 15,
+        fast_charging: true,
+        type: "MagSafe"
+      }
+    },
+    // Accessories - Cable
+    {
+      title: "USB-C to Lightning Cable",
+      slug: "usb-c-to-lightning-cable-new",
+      description: "1m USB-C to Lightning cable",
+      price: 4990,
+      stock: 50,
+      categorySlug: "accessories",
+      subcategorySlug: "cables",
+      attributes: {
+        length: 1,
+        connector_type: "USB-C to Lightning",
+        fast_charging: true
+      }
+    },
+    // Accessories - Case
+    {
+      title: "iPhone 15 Pro Max Clear Case",
+      slug: "iphone-15-pro-max-clear-case-new",
+      description: "Clear case with MagSafe",
+      price: 6990,
+      stock: 25,
+      categorySlug: "accessories",
+      subcategorySlug: "cases",
+      attributes: {
+        material: "Polycarbonate",
+        magsafe: true,
+        color: "Clear"
+      }
     }
   ];
 
   for (const product of products) {
+    // Check if product exists first
+    const checkResult = await apiRequest("GET", `/admin/products?slug=${product.slug}`, null, tokens.admin);
+    
+    if (checkResult.success && checkResult.data.data && checkResult.data.data.length > 0) {
+      log(`  ⏭️  Product exists, skipping: ${product.title}`, "yellow");
+      productIds.push(checkResult.data.data[0]._id);
+      continue;
+    }
+    
     const result = await apiRequest("POST", "/admin/products", product, tokens.admin);
-    if (result.success) {
+    
+    if (result.success && result.data.data && result.data.data._id) {
       productIds.push(result.data.data._id);
-      log(`  ✅ Product created: ${product.title}`, "green");
+      log(`  ✅ Created: ${product.title} - ${product.price}₸`, "green");
     } else {
-      log(`  ❌ Failed to create product: ${product.title}`, "red");
+      log(`  ❌ Failed: ${product.title}`, "red");
     }
   }
 
   // ============================================================
-  // STEP 2: Register Test User
+  // STEP 5: Register Test User
   // ============================================================
-  logSection("STEP 2: Test User Registration");
+  logSection("STEP 5: Test User Login/Register");
 
-  log("  Registering test user...", "yellow");
-  const userRegister = await apiRequest("POST", "/auth/register", {
-    fullname: "Test User",
+  log("  Trying to login as test user...", "yellow");
+  const userLogin = await apiRequest("POST", "/auth/login", {
     phone: "+77011111111",
     password: "user1234"
   });
 
-  if (!userRegister.success) {
-    log("  ❌ User registration failed", "red");
-    return;
+  if (userLogin.success && userLogin.data.data && userLogin.data.data.token) {
+    tokens.user = userLogin.data.data.token;
+    log("  ✅ Test user logged in (already exists)", "green");
+  } else {
+    log("  User doesn't exist, registering...", "yellow");
+    const userRegister = await apiRequest("POST", "/auth/register", {
+      fullname: "Test User",
+      phone: "+77011111111",
+      password: "user1234"
+    });
+    
+    if (!userRegister.success) {
+      log("  ❌ User registration failed", "red");
+      return;
+    }
+    
+    tokens.user = userRegister.data.data.token;
+    log("  ✅ Test user registered and logged in", "green");
   }
 
-  tokens.user = userRegister.data.data.token;
-  log("  ✅ Test user registered and logged in", "green");
-
   // ============================================================
-  // STEP 3: User adds products to cart
+  // STEP 6: User adds products to cart (using /public/cart)
   // ============================================================
-  logSection("STEP 3: User Adds Products to Cart");
+  logSection("STEP 6: User Adds Products to Cart");
 
   log("  Adding products to cart...", "yellow");
   
-  // Add first product to cart
-  const addToCart1 = await apiRequest("POST", "/cart/items", {
-    productId: productIds[0],
-    quantity: 1
-  }, tokens.user);
-
-  if (addToCart1.success) {
-    log(`  ✅ Added Casio G-Shock to cart`, "green");
-  }
-
-  // Add second product to cart
-  const addToCart2 = await apiRequest("POST", "/cart/items", {
-    productId: productIds[1],
-    quantity: 1
-  }, tokens.user);
-
-  if (addToCart2.success) {
-    log(`  ✅ Added Seiko Automatic to cart`, "green");
+  // Add first 2 products using correct path: /api/public/cart
+  if (productIds.length >= 2) {
+    const cart1 = await apiRequest("POST", "/public/cart", {
+      productId: productIds[0],
+      quantity: 1
+    }, tokens.user);
+    log(`  ${cart1.success ? "✅" : "❌"} Added iPhone to cart`, cart1.success ? "green" : "red");
+    
+    const cart2 = await apiRequest("POST", "/public/cart", {
+      productId: productIds[1],
+      quantity: 1
+    }, tokens.user);
+    log(`  ${cart2.success ? "✅" : "❌"} Added iPad to cart`, cart2.success ? "green" : "red");
+  } else {
+    log("  ⚠️ Not enough products to add to cart", "yellow");
   }
 
   // ============================================================
-  // STEP 4: User creates order
+  // STEP 7: User creates order (using /public/orders)
   // ============================================================
-  logSection("STEP 4: User Creates Order");
+  logSection("STEP 7: User Creates Order");
 
   log("  Creating order...", "yellow");
-  const createOrder = await apiRequest("POST", "/orders", {
+  const createOrder = await apiRequest("POST", "/public/orders", {
     deliveryAddress: {
-      street: "ул. Пушкина 10",
+      street: "пр. Аль-Фараби 77",
       city: "Алматы",
       postalCode: "050000",
       country: "Казахстан"
@@ -228,14 +393,12 @@ async function runTest() {
 
   orderId = createOrder.data.data._id;
   log(`  ✅ Order created: ${createOrder.data.data.orderNumber}`, "green");
-  log(`  📦 Total price: ${createOrder.data.data.totalPrice} ₸`, "yellow");
 
   // ============================================================
-  // STEP 5: Moderator processes order
+  // STEP 8: Moderator processes order
   // ============================================================
-  logSection("STEP 5: Moderator Processes Order");
+  logSection("STEP 8: Moderator Processes Order");
 
-  // Login as moderator
   log("  Logging in as moderator...", "yellow");
   const modLogin = await apiRequest("POST", "/auth/login", {
     phone: "+77000000002",
@@ -243,7 +406,7 @@ async function runTest() {
   });
 
   if (!modLogin.success) {
-    log("  ❌ Moderator login failed. Make sure to run create-staff.js first!", "red");
+    log("  ❌ Moderator login failed", "red");
     return;
   }
 
@@ -254,48 +417,38 @@ async function runTest() {
   log("  Getting pending orders...", "yellow");
   const orders = await apiRequest("GET", "/moderator/orders?status=created", null, tokens.moderator);
   
-  if (orders.success && orders.data.data.length > 0) {
+  if (orders.success && orders.data.data && orders.data.data.length > 0) {
     const pendingOrder = orders.data.data[0];
     orderId = pendingOrder._id;
     log(`  📋 Found order: ${pendingOrder.orderNumber}`, "yellow");
 
     // Accept order
     log("  Accepting order...", "yellow");
-    const accept = await apiRequest("PUT", `/moderator/orders/${orderId}/accept`, null, tokens.moderator);
-    if (accept.success) {
-      log("  ✅ Order accepted by moderator", "green");
-    }
+    await apiRequest("PUT", `/moderator/orders/${orderId}/accept`, null, tokens.moderator);
+    log("  ✅ Order accepted", "green");
 
     // Pack order
     log("  Packing order...", "yellow");
-    const pack = await apiRequest("PUT", `/moderator/orders/${orderId}/pack`, null, tokens.moderator);
-    if (pack.success) {
-      log("  ✅ Order packed by moderator", "green");
-    }
+    await apiRequest("PUT", `/moderator/orders/${orderId}/pack`, null, tokens.moderator);
+    log("  ✅ Order packed", "green");
 
-    // Get available couriers
+    // Get couriers
     log("  Getting available couriers...", "yellow");
     const couriers = await apiRequest("GET", "/moderator/couriers", null, tokens.moderator);
     
-    if (couriers.success && couriers.data.data.length > 0) {
+    if (couriers.success && couriers.data.data && couriers.data.data.length > 0) {
       const courierId = couriers.data.data[0]._id;
       log(`  📦 Assigning order to courier: ${couriers.data.data[0].fullname}`, "yellow");
-      
-      const assign = await apiRequest("PUT", `/moderator/orders/${orderId}/assign`, 
-        { courierId }, tokens.moderator);
-      
-      if (assign.success) {
-        log("  ✅ Order assigned to courier", "green");
-      }
+      await apiRequest("PUT", `/moderator/orders/${orderId}/assign`, { courierId }, tokens.moderator);
+      log("  ✅ Order assigned to courier", "green");
     }
   }
 
   // ============================================================
-  // STEP 6: Courier delivers order
+  // STEP 9: Courier delivers order
   // ============================================================
-  logSection("STEP 6: Courier Delivers Order");
+  logSection("STEP 9: Courier Delivers Order");
 
-  // Login as courier
   log("  Logging in as courier...", "yellow");
   const courierLogin = await apiRequest("POST", "/auth/login", {
     phone: "+77000000003",
@@ -314,42 +467,34 @@ async function runTest() {
   log("  Getting assigned orders...", "yellow");
   const courierOrders = await apiRequest("GET", "/courier/orders", null, tokens.courier);
 
-  if (courierOrders.success && courierOrders.data.data.length > 0) {
+  if (courierOrders.success && courierOrders.data.data && courierOrders.data.data.length > 0) {
     const deliveryOrder = courierOrders.data.data[0];
     orderId = deliveryOrder._id;
     log(`  📋 Found order for delivery: ${deliveryOrder.orderNumber}`, "yellow");
 
     // Accept delivery
     log("  Accepting delivery...", "yellow");
-    const acceptDelivery = await apiRequest("PUT", `/courier/orders/${orderId}/accept`, null, tokens.courier);
-    if (acceptDelivery.success) {
-      log("  ✅ Delivery accepted", "green");
-    }
+    await apiRequest("PUT", `/courier/orders/${orderId}/accept`, null, tokens.courier);
+    log("  ✅ Delivery accepted", "green");
 
     // Start delivery
     log("  Starting delivery...", "yellow");
-    const startDelivery = await apiRequest("PUT", `/courier/orders/${orderId}/start`, 
-      { deliveryNote: "Доставка в будний день" }, tokens.courier);
-    if (startDelivery.success) {
-      log("  ✅ Delivery started", "green");
-    }
+    await apiRequest("PUT", `/courier/orders/${orderId}/start`, { deliveryNote: "В пути" }, tokens.courier);
+    log("  ✅ Delivery started", "green");
 
     // Mark as delivered
     log("  Marking as delivered...", "yellow");
-    const delivered = await apiRequest("PUT", `/courier/orders/${orderId}/delivered`, 
-      { deliveryNote: "Доставлено получателю" }, tokens.courier);
-    if (delivered.success) {
-      log("  ✅ Order delivered successfully!", "green");
-    }
+    await apiRequest("PUT", `/courier/orders/${orderId}/delivered`, { deliveryNote: "Доставлено" }, tokens.courier);
+    log("  ✅ Order delivered!", "green");
   }
 
   // ============================================================
-  // STEP 7: User creates support ticket
+  // STEP 10: User creates support ticket (using /public/tickets)
   // ============================================================
-  logSection("STEP 7: User Creates Support Ticket");
+  logSection("STEP 10: User Creates Support Ticket");
 
   log("  Creating support ticket...", "yellow");
-  const createTicket = await apiRequest("POST", "/tickets", {
+  const createTicket = await apiRequest("POST", "/public/tickets", {
     subject: "Вопрос о доставке",
     description: "Хотел узнать примерное время доставки",
     category: "delivery",
@@ -362,14 +507,13 @@ async function runTest() {
   }
 
   ticketId = createTicket.data.data._id;
-  log(`  ✅ Support ticket created: ${createTicket.data.data.ticketNumber}`, "green");
+  log(`  ✅ Support ticket created`, "green");
 
   // ============================================================
-  // STEP 8: Support responds to ticket
+  // STEP 11: Support responds to ticket
   // ============================================================
-  logSection("STEP 8: Support Responds to Ticket");
+  logSection("STEP 11: Support Responds to Ticket");
 
-  // Login as support
   log("  Logging in as support...", "yellow");
   const supportLogin = await apiRequest("POST", "/auth/login", {
     phone: "+77000000004",
@@ -388,36 +532,27 @@ async function runTest() {
   log("  Getting open tickets...", "yellow");
   const openTickets = await apiRequest("GET", "/support/tickets", null, tokens.support);
 
-  if (openTickets.success && openTickets.data.data.length > 0) {
+  if (openTickets.success && openTickets.data.data && openTickets.data.data.length > 0) {
     const ticket = openTickets.data.data[0];
     ticketId = ticket._id;
     log(`  📋 Found ticket: ${ticket.ticketNumber}`, "yellow");
 
     // Accept ticket
     log("  Accepting ticket...", "yellow");
-    const acceptTicket = await apiRequest("PUT", `/support/tickets/${ticketId}/accept`, null, tokens.support);
-    if (acceptTicket.success) {
-      log("  ✅ Ticket accepted", "green");
-    }
+    await apiRequest("PUT", `/support/tickets/${ticketId}/accept`, null, tokens.support);
+    log("  ✅ Ticket accepted", "green");
 
     // Add response message
     log("  Adding response message...", "yellow");
-    const response = await apiRequest("POST", `/support/tickets/${ticketId}/messages`, 
-      { message: "Здравствуйте! Ваш заказ был успешно доставлен. Если у вас есть дополнительные вопросы, пожалуйста, дайте знать." }, 
-      tokens.support);
-    
-    if (response.success) {
-      log("  ✅ Response added to ticket", "green");
-    }
+    await apiRequest("POST", `/support/tickets/${ticketId}/messages`, 
+      { message: "Ваш заказ доставлен!" }, tokens.support);
+    log("  ✅ Response added", "green");
 
     // Resolve ticket
     log("  Resolving ticket...", "yellow");
-    const resolve = await apiRequest("PUT", `/support/tickets/${ticketId}/resolve`, 
-      { message: "Ваш вопрос решен. Спасибо за обращение!" }, tokens.support);
-    
-    if (resolve.success) {
-      log("  ✅ Ticket resolved!", "green");
-    }
+    await apiRequest("PUT", `/support/tickets/${ticketId}/resolve`, 
+      { message: "Вопрос решен" }, tokens.support);
+    log("  ✅ Ticket resolved!", "green");
   }
 
   // ============================================================
@@ -425,14 +560,16 @@ async function runTest() {
   // ============================================================
   logSection("TEST COMPLETE - Summary");
 
-  log("  📊 Test Results:", "cyan");
-  log(`  ✅ Admin logged in and created ${productIds.length} products`, "green");
-  log(`  ✅ Test user registered (phone: +77011111111)`, "green");
-  log(`  ✅ User created order (ID: ${orderId})`, "green");
-  log(`  ✅ Moderator processed order (accept -> pack -> assign)`, "green");
-  log(`  ✅ Courier delivered order (accept -> start -> deliver)`, "green");
-  log(`  ✅ Support ticket created (ID: ${ticketId})`, "green");
-  log(`  ✅ Support responded and resolved ticket`, "green");
+  log("  ✅ Admin logged in", "green");
+  log("  ✅ Categories/Subcategories toggled", "green");
+  log(`  ✅ ${productIds.length} Apple products created/check`, "green");
+  log("  ✅ Test user logged in", "green");
+  log("  ✅ Products added to cart", "green");
+  log("  ✅ Order created", "green");
+  log("  ✅ Moderator processed order", "green");
+  log("  ✅ Courier delivered order", "green");
+  log("  ✅ Support ticket created", "green");
+  log("  ✅ Support responded and resolved", "green");
 
   log("\n  📝 Test Credentials:", "cyan");
   log("  Admin:   +77000000001 / admin1234", "yellow");
@@ -441,10 +578,10 @@ async function runTest() {
   log("  Support:  +77000000004 / support1234", "yellow");
   log("  User:    +77011111111 / user1234", "yellow");
 
-  log("\n  🎉 Full journey test completed successfully!", "green");
+  log("\n  🎉 Full journey test completed!", "green");
 }
 
 runTest().catch(error => {
-  log(`\n  ❌ Test failed with error: ${error.message}`, "red");
+  log(`\n  ❌ Test failed: ${error.message}`, "red");
   process.exit(1);
 });

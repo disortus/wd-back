@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import { DB_MODELS, ORDER_STATUS_TYPES_LIST, ORDER_STATUS_TYPES } from "../utils/enums.js";
 
-// TODO: make shure that this model absolutely right
-
 const orderItemAttributesSchema = new mongoose.Schema({
     key: { 
         type: String, 
@@ -165,28 +163,32 @@ const orderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Generate order number before saving
-orderSchema.pre("save", async function(next) {
-    if (this.isNew) {
+orderSchema.pre("validate", async function() {
+    if (!this.orderNumber) {
         const count = await mongoose.model(DB_MODELS.ORDER).countDocuments();
+
         const timestamp = Date.now().toString(36).toUpperCase();
+
         const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-        this.orderNumber = `ORD-${timestamp}-${random}-${(count + 1).toString().padStart(4, "0")}`;
+
+        this.orderNumber = `ORD-${timestamp}-${random}-${String(count + 1).padStart(4, "0")}`;
     }
-    next();
 });
 
 // Update status history on status change
-orderSchema.pre("save", function(next) {
-    if (this.isModified("status")) {
-        const lastHistory = this.statusHistory[this.statusHistory.length - 1];
-        if (!lastHistory || lastHistory.status !== this.status) {
-            this.statusHistory.push({
-                status: this.status,
-                changedAt: new Date()
-            });
-        }
+orderSchema.pre("save", function() {
+    if (this.isNew) {
+        this.statusHistory.push({
+            status: this.status,
+            changedAt: new Date()
+        });
     }
-    next();
+    else if (this.isModified("status")) {
+        this.statusHistory.push({
+            status: this.status,
+            changedAt: new Date()
+        });
+    }
 });
 
 // Indexes

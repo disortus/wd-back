@@ -133,28 +133,27 @@ const ticketSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Generate ticket number before saving
-ticketSchema.pre("save", async function(next) {
-    if (this.isNew) {
-        const count = await mongoose.model(DB_MODELS.SUPPORT_TICKET).countDocuments();
+ticketSchema.pre("validate", async function() {
+
+    if (!this.ticketNumber) {
+        const count = await this.constructor.countDocuments();
+
         const timestamp = Date.now().toString(36).toUpperCase();
+
         const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-        this.ticketNumber = `TKT-${timestamp}-${random}-${(count + 1).toString().padStart(4, "0")}`;
+
+        this.ticketNumber = `TKT-${timestamp}-${random}-${String(count + 1).padStart(4, "0")}`;
     }
-    next();
 });
 
 // Update status history on status change
-ticketSchema.pre("save", function(next) {
-    if (this.isModified("status")) {
-        const lastHistory = this.statusHistory[this.statusHistory.length - 1];
-        if (!lastHistory || lastHistory.status !== this.status) {
-            this.statusHistory.push({
-                status: this.status,
-                changedAt: new Date()
-            });
-        }
+ticketSchema.pre("save", function() {
+    if (this.isNew || this.isModified("status")) {
+        this.statusHistory.push({
+            status: this.status,
+            changedAt: new Date()
+        });
     }
-    next();
 });
 
 // Method to add message to ticket

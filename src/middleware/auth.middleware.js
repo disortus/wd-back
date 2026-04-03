@@ -6,6 +6,15 @@ export const requireAuth = expressjwt({
     algorithms: ["HS256"],
     requestProperty: "auth",
     getToken: (req) => {
-        return req.cookies.token
+        // First try to get token from cookie
+        if (req.cookies.token) {
+            return req.cookies.token;
+        }
+        // Then try to get from Authorization header
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
     }
 });
