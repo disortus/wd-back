@@ -213,6 +213,64 @@ export const deleteProduct = asyncHandler(
 
 
 
+// Increase product stock (admin can add or remove)
+export const increaseStock = asyncHandler(
+  async (req, res) => {
+    const { quantity } = req.body;
+    const productId = req.params.id;
+
+    if (!quantity || quantity <= 0) {
+      throw new AppError(400, "quantity must be a positive number");
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      throw new AppError(404, "product not found");
+    }
+
+    product.stock += quantity;
+
+    await product.save();
+
+    res.json({
+      success: true,
+      data: product
+    });
+  }
+);
+
+// Decrease product stock (admin can add or remove)
+export const decreaseStock = asyncHandler(
+  async (req, res) => {
+    const { quantity } = req.body;
+    const productId = req.params.id;
+
+    if (!quantity || quantity <= 0) {
+      throw new AppError(400, "quantity must be a positive number");
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      throw new AppError(404, "product not found");
+    }
+
+    if (product.stock < quantity) {
+      throw new AppError(400, "insufficient stock");
+    }
+
+    product.stock -= quantity;
+
+    await product.save();
+
+    res.json({
+      success: true,
+      data: product
+    });
+  }
+);
+
 export const getProductsAdmin = asyncHandler(
   async (req, res) => {
 

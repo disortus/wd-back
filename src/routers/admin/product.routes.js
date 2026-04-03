@@ -1,45 +1,31 @@
 import { Router } from "express";
 
 import {
-
   createProduct,
-
   updateProduct,
-
   deleteProduct,
-
-  getProductsAdmin
-
+  getProductsAdmin,
+  increaseStock,
+  decreaseStock
 } from "../../controllers/admin/product.controller.js";
 
-
 import {
-
   createProductValidator,
-
   updateProductValidator,
-
-  idParamValidator
-
+  idParamValidator,
+  stockValidator
 } from "../../validators/product.validator.js";
 
-
 import {
-
   validate
-
 } from "../../middleware/validation.middleware.js";
 
 import {
-
   requireAuth
-
 } from "../../middleware/auth.middleware.js";
 
 import {
-
   allowRoles
-
 } from "../../middleware/role.middleware.js";
 
 
@@ -72,6 +58,23 @@ router.delete(
   idParamValidator,
   validate,
   deleteProduct
+);
+
+// Stock management routes
+router.patch(
+  "/:id/increase-stock",
+  idParamValidator,
+  stockValidator,
+  validate,
+  increaseStock
+);
+
+router.patch(
+  "/:id/decrease-stock",
+  idParamValidator,
+  stockValidator,
+  validate,
+  decreaseStock
 );
 
 

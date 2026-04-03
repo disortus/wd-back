@@ -73,6 +73,11 @@ export const queryProductsValidator = [
         .isInt()
 ];
 
+export const stockValidator = [
+    body("quantity")
+        .isInt({ min: 1 }).withMessage("quantity must be a positive integer")
+];
+
 export const idParamValidator = [
     param("id")
         .isMongoId().withMessage("invalid id format")

@@ -136,6 +136,13 @@ async function runTest() {
   }
 
   // ============================================================
+  // STEP 3.5: Test Admin Stock Management
+  // ============================================================
+  logSection("STEP 3.5: Test Admin Stock Management");
+
+  // Stock management will be tested after products are created (STEP 4.5)
+
+  // ============================================================
   // STEP 4: Create Apple Products
   // ============================================================
   logSection("STEP 4: Create Apple Products");
@@ -315,6 +322,25 @@ async function runTest() {
   }
 
   // ============================================================
+  // STEP 4.5: Test Admin Stock Management
+  // ============================================================
+  logSection("STEP 4.5: Test Admin Stock Management");
+
+  if (productIds.length > 0) {
+    const testProductId = productIds[0];
+    
+    // Admin increases stock
+    log("  Admin increasing stock for product...", "yellow");
+    let result = await apiRequest("PATCH", `/admin/products/${testProductId}/increase-stock`, { quantity: 5 }, tokens.admin);
+    log(`  ${result.success ? "✅" : "❌"} Admin increase stock: ${result.success ? "success" : "failed"}`, result.success ? "green" : "red");
+    
+    // Admin decreases stock
+    log("  Admin decreasing stock for product...", "yellow");
+    result = await apiRequest("PATCH", `/admin/products/${testProductId}/decrease-stock`, { quantity: 3 }, tokens.admin);
+    log(`  ${result.success ? "✅" : "❌"} Admin decrease stock: ${result.success ? "success" : "failed"}`, result.success ? "green" : "red");
+  }
+
+  // ============================================================
   // STEP 5: Register Test User
   // ============================================================
   logSection("STEP 5: Test User Login/Register");
@@ -412,6 +438,14 @@ async function runTest() {
 
   tokens.moderator = modLogin.data.data.token;
   log("  ✅ Moderator logged in", "green");
+
+  // Test moderator stock increase (only increase, not decrease)
+  if (productIds.length > 0) {
+    const testProductId = productIds[0];
+    log("  Moderator increasing stock for product...", "yellow");
+    let result = await apiRequest("PATCH", `/moderator/products/${testProductId}/increase-stock`, { quantity: 10 }, tokens.moderator);
+    log(`  ${result.success ? "✅" : "❌"} Moderator increase stock: ${result.success ? "success" : "failed"}`, result.success ? "green" : "red");
+  }
 
   // Get orders
   log("  Getting pending orders...", "yellow");
@@ -561,6 +595,7 @@ async function runTest() {
   logSection("TEST COMPLETE - Summary");
 
   log("  ✅ Admin logged in", "green");
+  log("  ✅ Admin/Moderator stock management tested", "green");
   log("  ✅ Categories/Subcategories toggled", "green");
   log(`  ✅ ${productIds.length} Apple products created/check`, "green");
   log("  ✅ Test user logged in", "green");
