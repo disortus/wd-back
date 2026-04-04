@@ -53,3 +53,49 @@ export const rateTicketValidator = [
         .optional()
         .isString()
 ];
+
+// Support-side validators
+export const supportTicketIdParamValidator = [
+    param("id")
+        .isMongoId().withMessage("Invalid ticket ID format")
+];
+
+export const supportAddMessageValidator = [
+    param("id")
+        .isMongoId().withMessage("Invalid ticket ID format"),
+
+    body("message")
+        .notEmpty().withMessage("Message is required")
+        .isLength({ min: 1 }).withMessage("Message cannot be empty"),
+
+    body("attachments")
+        .optional()
+        .isArray().withMessage("Attachments must be an array")
+];
+
+export const supportResolveCloseValidator = [
+    param("id")
+        .isMongoId().withMessage("Invalid ticket ID format"),
+
+    body("message")
+        .optional()
+        .isString().withMessage("Message must be a string")
+];
+
+export const supportReopenValidator = [
+    param("id")
+        .isMongoId().withMessage("Invalid ticket ID format"),
+
+    body("reason")
+        .optional()
+        .isString().withMessage("Reason must be a string")
+];
+
+export const supportRejectTicketValidator = [
+    param("id")
+        .isMongoId().withMessage("Invalid ticket ID format"),
+
+    body("reason")
+        .optional()
+        .isString().withMessage("Reason must be a string")
+];

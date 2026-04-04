@@ -436,11 +436,20 @@ Query: ?page=1&limit=20&priority=high&category=order
 Response: { ok: true, data: [Ticket], pagination }
 Note: Показывает все открытые тикеты (высокий приоритет первым)
 
+GET /api/support/tickets/archived
+Query: ?page=1&limit=20&status=resolved|closed
+Response: { ok: true, data: [Ticket], pagination }
+Note: Архив тикетов саппорта (resolved/closed), включая закрытые чаты
+
 GET /api/support/tickets/stats
 Response: { ok: true, data: { open, myAssigned, myResolved, myClosed, avgResolutionTimeMs } }
 
 GET /api/support/tickets/:id
 Response: { ok: true, data: Ticket }
+
+GET /api/support/tickets/:id/messages
+Response: { ok: true, data: { ticketId, ticketNumber, status, assignedTo, messages, updatedAt } }
+Note: Доступен для любых статусов, включая closed
 
 POST /api/support/tickets/:id/accept
 Response: { ok: true, data: Ticket }
@@ -449,6 +458,11 @@ Note: Назначает тикет агенту поддержки, меняе�
 POST /api/support/tickets/:id/release
 Response: { ok: true, data: Ticket }
 Note: Освобождает назначение, статус обратно "open"
+
+POST /api/support/tickets/:id/reject
+Body: { reason?: string }
+Response: { ok: true, data: Ticket }
+Note: Для назначенного агента; возвращает тикет в "open" с сохранением истории переписки
 
 POST /api/support/tickets/:id/message
 Body: { message: string, attachments?: [string] }

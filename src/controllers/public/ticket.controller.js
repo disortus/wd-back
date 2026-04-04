@@ -101,7 +101,7 @@ export const getMyTicket = asyncHandler(async (req, res) => {
 
 // Add message to ticket
 export const addTicketMessage = asyncHandler(async (req, res) => {
-    const { message, attachments = [] } = req.body;
+    const { message, attachments = [] } = req.body || {};
 
     if (!message) {
         throw new AppError(400, "Message is required");
@@ -121,9 +121,15 @@ export const addTicketMessage = asyncHandler(async (req, res) => {
         throw new AppError(400, "Cannot add messages to closed ticket");
     }
 
+    const user = await User.findById(req.auth.id).select("fullname");
+
+    if (!user) {
+        throw new AppError(404, "User not found");
+    }
+
     ticket.addMessage(
         { _id: req.auth.id, role: req.auth.role },
-        req.user.fullname,
+        user.fullname,
         message,
         attachments
     );

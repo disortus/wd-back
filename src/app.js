@@ -63,7 +63,7 @@ app.use(helmet({
 app.use(globalRateLimit);
 
 // HTTP requests logger (combined format to file)
-app.use(morgan("combined", { stream: accessLogStream }));
+// app.use(morgan("combined", { stream: accessLogStream }));
 
 // Also log to console in development
 app.use(morgan("dev"));

@@ -170,10 +170,14 @@ ticketSchema.methods.addMessage = function(sender, senderName, message, attachme
 
 // Method to assign ticket to support agent
 ticketSchema.methods.assignTo = function(agent) {
+    if (!agent?._id) {
+        throw new Error("Support agent with _id is required");
+    }
+
     this.assignedTo = agent._id;
     this.assignedToSnapshot = {
-        fullname: agent.fullname,
-        phone: agent.phone
+        fullname: agent.fullname || "",
+        phone: agent.phone || ""
     };
     this.assignedAt = new Date();
     this.status = TICKET_STATUS_TYPES.ASSIGNED;
