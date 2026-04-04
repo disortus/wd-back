@@ -40,7 +40,7 @@ app.use(cookieParser());
 
 // CORS
 app.use(cors({
-    origin: ["http://localhost:5173", "https://wd-front-41qu.vercel.app"],
+    origin: ["http://localhost:5173", "https://wd-front-41qu.vercel.app", "https://wd-front.vercel.app"],
     credentials: true
 }));
 
