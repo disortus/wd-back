@@ -9,7 +9,12 @@ export const registerValidator = [
         .isMobilePhone("kk-KZ").withMessage("invalid phone number format"),
     
     body("password")
-        .isLength({ min: 6 }).withMessage("password must be 6 characters at least")
+        .isLength({ min: 6 }).withMessage("password must be 6 characters at least"),
+
+    body("confirmPassword")
+        .notEmpty().withMessage("confirm password is required")
+        .custom((value, { req }) => value === req.body.password)
+        .withMessage("passwords do not match")
 ];
 
 export const loginValidator = [
