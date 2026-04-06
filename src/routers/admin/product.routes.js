@@ -6,14 +6,17 @@ import {
   deleteProduct,
   getProductsAdmin,
   increaseStock,
-  decreaseStock
+  decreaseStock,
+  uploadProductImages,
+  deleteProductImage
 } from "../../controllers/admin/product.controller.js";
 
 import {
   createProductValidator,
   updateProductValidator,
   idParamValidator,
-  stockValidator
+  stockValidator,
+  imagesValidator
 } from "../../validators/product.validator.js";
 
 import {
@@ -27,6 +30,8 @@ import {
 import {
   allowRoles
 } from "../../middleware/role.middleware.js";
+
+import { upload } from "../../utils/file-upload.js";
 
 
 const router = Router();
@@ -46,11 +51,29 @@ router.post(
   createProduct
 );
 
+// Upload images to existing product
+router.post(
+  "/:id/images",
+  idParamValidator,
+  validate,
+  upload.array("images", 10),
+  uploadProductImages
+);
+
+// Update product (after image upload)
 router.patch(
   "/:id",
   updateProductValidator,
   validate,
   updateProduct
+);
+
+// Delete single image from product
+router.delete(
+  "/:id/images/:imageIndex",
+  idParamValidator,
+  validate,
+  deleteProductImage
 );
 
 router.delete(

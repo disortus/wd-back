@@ -111,3 +111,16 @@ export const idParamValidator = [
     param("id")
         .isMongoId().withMessage("invalid id format")
 ];
+
+export const imageIndexValidator = [
+    param("imageIndex")
+        .isInt({ min: 0 }).withMessage("imageIndex must be a non-negative integer")
+];
+
+export const imagesValidator = [
+    body("images")
+        .isArray({ min: 1, max: 10 }).withMessage("images must be an array with 1-10 items"),
+    
+    body("images.*")
+        .isString().withMessage("each image must be a string URL")
+];

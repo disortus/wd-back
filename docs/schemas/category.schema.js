@@ -3,44 +3,78 @@
  * components:
  *   schemas:
  *
- *     Category:
+ *     CategoryCreate:
  *       type: object
+ *       required:
+ *         - name
+ *         - slug
  *       properties:
- *
- *         _id:
- *           type: string
- *           example: 67f1c9a812e4ab1234567890
- *
  *         name:
  *           type: string
- *           example: iPhone
- *
+ *           example: Electronics
  *         slug:
  *           type: string
- *           example: iphone
- *
+ *           pattern: '^[a-z0-9_]+$'
+ *           example: electronics
  *         image:
  *           type: string
- *           example: /uploads/categories/iphone.webp
+ *           example: /imgs/electronics.jpg
  *
- *         createdAt:
- *           type: string
- *           format: date-time
- *
- *         updatedAt:
- *           type: string
- *           format: date-time
- *
- *
- *     CategoryListResponse:
+ *     CategoryUpdate:
  *       type: object
  *       properties:
- *
- *         success:
+ *         name:
+ *           type: string
+ *         slug:
+ *           type: string
+ *         image:
+ *           type: string
+ *         isActive:
  *           type: boolean
  *
+ *     SubcategoryCreate:
+ *       type: object
+ *       required:
+ *         - name
+ *         - slug
+ *         - categorySlug
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: Smartphones
+ *         slug:
+ *           type: string
+ *           pattern: '^[a-z0-9_]+$'
+ *           example: smartphones
+ *         categorySlug:
+ *           type: string
+ *           example: electronics
+ *
+ *     SubcategoryUpdate:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         slug:
+ *           type: string
+ *         isActive:
+ *           type: boolean
+ *
+ *     CategoryResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *         data:
+ *           $ref: '#/components/schemas/Category'
+ *
+ *     CategoriesListResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
  *         data:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/Category'
+ *             $ref: '#/components/schemas/CategoryWithSubcategories'
  */

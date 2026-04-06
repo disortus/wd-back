@@ -1,4 +1,7 @@
 import slugify from "slugify";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import Product from "../../models/Product.js";
 
@@ -11,6 +14,8 @@ import { ensureSubcategoryBelongsToCategory, validateProductAttributes } from ".
 import { asyncHandler } from "../../utils/async-handler.js";
 
 import { AppError } from "../../utils/app-errors.js";
+
+import { toStoredFilePaths, IMGS_DIR } from "../../utils/file-upload.js";
 
 
 export const createProduct = asyncHandler(
@@ -361,6 +366,97 @@ export const decreaseStock = asyncHandler(
     res.json({
       success: true,
       data: product
+    });
+  }
+);
+
+// Upload product images
+export const uploadProductImages = asyncHandler(
+  async (req, res) => {
+    const { id } = req.params;
+    
+    // Check if files were uploaded
+    if (!req.files || req.files.length === 0) {
+      throw new AppError(400, "No images uploaded");
+    }
+
+    // Find the product
+    const product = await Product.findById(id);
+    
+    if (!product) {
+      throw new AppError(404, "product not found");
+    }
+
+    // Get uploaded file paths
+    const newImagePaths = toStoredFilePaths(req.files);
+    
+    // Add new images to existing ones
+    const updatedImages = [...(product.images || []), ...newImagePaths];
+    
+    // If no mainImage, set the first new image as mainImage
+    let mainImage = product.mainImage;
+    if (!mainImage && newImagePaths.length > 0) {
+      mainImage = newImagePaths[0];
+    }
+
+    // Update the product
+    product.images = updatedImages;
+    product.mainImage = mainImage;
+    await product.save();
+
+    res.json({
+      success: true,
+      data: product,
+      message: `${req.files.length} image(s) uploaded successfully`
+    });
+  }
+);
+
+// Delete a product image by index
+export const deleteProductImage = asyncHandler(
+  async (req, res) => {
+    const { id, imageIndex } = req.params;
+    
+    // Find the product
+    const product = await Product.findById(id);
+    
+    if (!product) {
+      throw new AppError(404, "product not found");
+    }
+
+    const index = parseInt(imageIndex, 10);
+    
+    if (index < 0 || index >= product.images.length) {
+      throw new AppError(400, "Invalid image index");
+    }
+
+    // Get the image path to delete the file
+    const imagePath = product.images[index];
+    
+    // Remove the image from the array
+    product.images.splice(index, 1);
+    
+    // Update mainImage if needed
+    if (product.mainImage === imagePath) {
+      product.mainImage = product.images[0] || "";
+    }
+
+    await product.save();
+
+    // Optionally delete the file from disk (only if it's a local image)
+    if (imagePath && imagePath.startsWith("/imgs/")) {
+      const filename = imagePath.replace("/imgs/", "");
+      const fullPath = path.join(IMGS_DIR, filename);
+      
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    res.json({
+      success: true,
+      data: product,
+      message: "Image deleted successfully"
     });
   }
 );

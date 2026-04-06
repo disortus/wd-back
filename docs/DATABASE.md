@@ -137,22 +137,31 @@ userSchema.index({ "stats.totalSpent": -1 });
 **Схема:**
 
 | Поле | Тип | Обязательно | Описание |
-|------|-----|-------------|-----------|
+|------|-----|-------------|----------|
 | `_id` | ObjectId | Да | Уникальный идентификатор |
 | `title` | String | Да | Название товара (уникальное) |
 | `slug` | String | Да | URL-friendly идентификатор (уникальный) |
 | `categorySlug` | String | Да | Слаг категории |
 | `subcategorySlug` | String | Да | Слаг подкатегории |
-| `attributes` | Map | Нет | Атрибуты товара |
+| `attributes` | Array | Нет | Массив объектов атрибутов |
 | `description` | String | Нет | Описание товара |
 | `price` | Number | Да | Цена товара |
 | `stock` | Number | Нет | Количество на складе |
 | `category_id` | ObjectId | Да | Ссылка на категорию |
-| `images` | Array | Нет | Массив URL изображений |
-| `specs` | Object | Нет | Технические характеристики |
+| `images` | Array | Нет | Массив URL/path изображений |
+| `mainImage` | String | Нет | Основное изображение |
 | `isActive` | Boolean | Нет | Статус активности |
 | `createdAt` | Date | Да | Дата создания |
 | `updatedAt` | Date | Да | Дата обновления |
+
+**Структура атрибутов (attributes):**
+```javascript
+[
+  { key: "color", label: "Color", value: "Space Gray", unit: null },
+  { key: "storage", label: "Storage", value: 256, unit: "GB" },
+  { key: "display", label: "Display", value: "6.1", unit: "inch" }
+]
+```
 
 **Индексы:**
 ```javascript
@@ -169,19 +178,16 @@ productShema.index({ slug: 1 }); // уникальный
   "slug": "iphone-15-pro",
   "categorySlug": "electronics",
   "subcategorySlug": "smartphones",
-  "attributes": {
-    "color": "Space Gray",
-    "storage": "256GB",
-    "display": "Super Retina XDR",
-    "processor": "A17 Pro",
-    "battery": "3274mAh"
-  },
+  "attributes": [
+    { key: "color", label: "Color", value: "Space Gray", unit: null },
+    { key: "storage", label: "Storage", value: 256, unit: "GB" }
+  ],
   "description": "iPhone 15 Pro с чипом A17 Pro",
-  "price": 999,
+  "price": 999990,
   "stock": 50,
   "category_id": "507f1f77bcf86cd799439001",
-  "images": ["https://example.com/iphone15.jpg"],
-  "specs": {},
+  "images": ["/imgs/123456789-test.jpg"],
+  "mainImage": "/imgs/123456789-test.jpg",
   "isActive": true,
   "createdAt": "2024-01-01T00:00:00Z",
   "updatedAt": "2024-01-15T10:30:00Z"
