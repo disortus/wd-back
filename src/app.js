@@ -75,6 +75,13 @@ app.use(requestLogger);
 // Response compression
 app.use(compression());
 
+// Serve uploaded images with CORP headers
+app.use("/imgs", express.static(path.join(__dirname, "../imgs"), {
+    setHeaders: (res) => {
+        res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    }
+}));
+
 // All routes
 app.use("/api", router);
 

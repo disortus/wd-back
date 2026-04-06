@@ -249,7 +249,7 @@ export const updateProduct = asyncHandler(
 
         {
 
-          new: true,
+          returnDocument: "after",
           runValidators: true
 
         }

@@ -42,7 +42,7 @@ export const updateMe = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.auth.id,
         updates,
-        { new: true, runValidators: true }
+        { returnDocument: "after", runValidators: true }
     );
 
     if (!user) {
@@ -76,7 +76,7 @@ export const updateEmail = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.auth.id,
         { email: email.toLowerCase() },
-        { new: true, runValidators: true }
+        { returnDocument: "after", runValidators: true }
     );
 
     if (!user) {

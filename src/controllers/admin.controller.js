@@ -47,7 +47,7 @@ export const getUsers = asyncHandler(async (req, res) => {
 
 export const updateUser = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, 
-        { new: true, runValidators: true }).select("-passwordHash");
+        { returnDocument: "after", runValidators: true }).select("-passwordHash");
 
     if (!user) {
         throw new AppError(404, "user not found");

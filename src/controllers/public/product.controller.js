@@ -54,7 +54,7 @@ export const getProducts = asyncHandler(async (req, res) => {
 });
 
 export const getProductBySlug = asyncHandler(async (req, res) => {
-    const product = await Product.findOne({ slug: req.param.slug, isActive: true });
+    const product = await Product.findOne({ slug: req.params.slug, isActive: true });
 
     if (!product) {
         throw new AppError(404, "product not found");
