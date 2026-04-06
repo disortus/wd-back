@@ -42,6 +42,14 @@ export const updateProductValidator = [
     body("title")
         .optional()
         .isLength({ min: 3 }).withMessage("title too short"),
+
+    body("categorySlug")
+        .optional()
+        .isIn(CATEGORY_TYPES_LIST).withMessage("invalid category type"),
+
+    body("subcategorySlug")
+        .optional()
+        .isIn(SUBCATEGORY_TYPES_LIST).withMessage("invalid subcategory type"),
     
     body("price")
         .optional()
@@ -65,7 +73,11 @@ export const updateProductValidator = [
     
     body("description")
         .optional()
-        .isString().withMessage("description must be a string")
+        .isString().withMessage("description must be a string"),
+
+    body("isActive")
+        .optional()
+        .isBoolean().withMessage("isActive must be a boolean")
 ];
 
 export const queryProductsValidator = [
