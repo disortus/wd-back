@@ -1,6 +1,53 @@
 import mongoose from "mongoose";
 import { USER_ROLE_TYPES_LIST, USER_ROLE_TYPES, DB_MODELS } from "../utils/enums.js";
 
+const addressSchema = new mongoose.Schema({
+    label: {
+        type: String,
+        default: "Home",
+        trim: true
+    },
+    isDefault: {
+        type: Boolean,
+        default: false
+    },
+    recipientName: {
+        type: String,
+        default: "",
+        trim: true
+    },
+    phone: {
+        type: String,
+        default: "",
+        trim: true
+    },
+    address: {
+        type: String,
+        default: "",
+        trim: true
+    },
+    entrance: {
+        type: String,
+        default: "",
+        trim: true
+    },
+    apartment: {
+        type: String,
+        default: "",
+        trim: true
+    },
+    city: {
+        type: String,
+        default: "Astana",
+        trim: true
+    },
+    instructions: {
+        type: String,
+        default: "",
+        trim: true
+    }
+}, { _id: true });
+
 const userSchema = new mongoose.Schema({
     fullname: {
         type: String,
@@ -16,7 +63,15 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
+    },
+
+    email: {
+        type: String,
+        default: null,
+        trim: true,
+        lowercase: true
     },
 
     role: {
@@ -35,7 +90,6 @@ const userSchema = new mongoose.Schema({
         default: null
     },
 
-    // Profile extension fields
     profile: {
         avatar: {
             type: String,
@@ -56,47 +110,11 @@ const userSchema = new mongoose.Schema({
         }
     },
 
-    // Delivery addresses (for future extension)
-    addresses: [{
-        label: {
-            type: String,
-            default: "Home"
-        },
-        isDefault: {
-            type: Boolean,
-            default: false
-        },
-        recipientName: {
-            type: String,
-            default: ""
-        },
-        phone: {
-            type: String,
-            default: ""
-        },
-        street: {
-            type: String,
-            default: ""
-        },
-        city: {
-            type: String,
-            default: ""
-        },
-        postalCode: {
-            type: String,
-            default: ""
-        },
-        country: {
-            type: String,
-            default: ""
-        },
-        instructions: {
-            type: String,
-            default: ""
-        }
-    }],
+    addresses: {
+        type: [addressSchema],
+        default: []
+    },
 
-    // Notification preferences
     notifications: {
         email: {
             orderUpdates: { type: Boolean, default: true },
@@ -109,7 +127,6 @@ const userSchema = new mongoose.Schema({
         }
     },
 
-    // Statistics (for admin/moderator use)
     stats: {
         totalOrders: {
             type: Number,
@@ -129,15 +146,16 @@ const userSchema = new mongoose.Schema({
         }
     },
 
-    // For staff roles
     staffInfo: {
         department: {
             type: String,
-            default: ""
+            default: "",
+            trim: true
         },
         employeeId: {
             type: String,
-            default: ""
+            default: "",
+            trim: true
         },
         hireDate: {
             type: Date,
@@ -159,11 +177,40 @@ userSchema.virtual("defaultAddress").get(function() {
     return this.addresses.find(addr => addr.isDefault) || this.addresses[0] || null;
 });
 
+userSchema.pre("save", async function() {
+    if (typeof this.email === "string") {
+        const normalizedEmail = this.email.trim().toLowerCase();
+        this.email = normalizedEmail || null;
+    }
+
+    if (Array.isArray(this.addresses) && this.addresses.length > 0) {
+        let hasDefault = false;
+
+        this.addresses.forEach((address) => {
+            address.city = "Astana";
+
+            if (address.isDefault && !hasDefault) {
+                hasDefault = true;
+                return;
+            }
+
+            if (address.isDefault && hasDefault) {
+                address.isDefault = false;
+            }
+        });
+
+        if (!hasDefault) {
+            this.addresses[0].isDefault = true;
+        }
+    }
+});
+
 // Method to get public profile
 userSchema.methods.getPublicProfile = function() {
     return {
         id: this._id,
         fullname: this.fullname,
+        email: this.email || "",
         phone: this.phone,
         role: this.role,
         avatar: this.profile?.avatar || "",
@@ -176,6 +223,7 @@ userSchema.methods.getFullProfile = function() {
     return {
         id: this._id,
         fullname: this.fullname,
+        email: this.email || "",
         phone: this.phone,
         role: this.role,
         profile: this.profile,

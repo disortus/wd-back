@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../../models/User.js";
-import { USER_ROLE_TYPES, USER_ROLE_TYPES_LIST } from "../../utils/enums.js";
+import { USER_ROLE_TYPES, USER_ROLE_TYPES_LIST, STAFF_ROLE_TYPES_LIST } from "../../utils/enums.js";
 import { AppError } from "../../utils/app-errors.js";
 import { asyncHandler } from "../../utils/async-handler.js";
 
@@ -288,6 +288,94 @@ export const deleteUser = asyncHandler(async (req, res) => {
         ok: true,
         message: "User deactivated successfully"
     });
+});
+
+// Get all staff (non-client users)
+export const getStaff = asyncHandler(async (req, res) => {
+    const {
+        page = "1",
+        limit = "20",
+        role,
+        search,
+        isActive
+    } = req.query;
+
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 20;
+
+    // Staff roles only (exclude regular users)
+    const staffRoles = STAFF_ROLE_TYPES_LIST;
+    
+    const query = {
+        role: { $in: staffRoles }
+    };
+
+    if (role) {
+        query.role = role;
+    }
+
+    if (isActive !== undefined) {
+        query.isActive = isActive === "true";
+    }
+
+    if (search) {
+        query.$or = [
+            { fullname: { $regex: search, $options: "i" } },
+            { phone: { $regex: search, $options: "i" } }
+        ];
+    }
+
+    const users = await User.find(query)
+        .select("-passwordHash")
+        .sort({ createdAt: -1 })
+        .skip((pageNumber - 1) * limitNumber)
+        .limit(limitNumber)
+        .lean();
+
+    const total = await User.countDocuments(query);
+
+    res.json({
+        ok: true,
+        data: users,
+        pagination: {
+            page: pageNumber,
+            limit: limitNumber,
+            total,
+            pages: Math.ceil(total / limitNumber)
+        }
+    });
+});
+
+// Delete staff (permanent or soft)
+export const deleteStaff = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { permanent = false } = req.query;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+        throw new AppError(404, "Staff not found");
+    }
+
+    // Prevent deleting self
+    if (user._id.toString() === req.auth.id) {
+        throw new AppError(400, "Cannot delete your own account");
+    }
+
+    if (permanent) {
+        await User.findByIdAndDelete(id);
+        res.json({
+            ok: true,
+            message: "Staff permanently deleted"
+        });
+    } else {
+        user.isActive = false;
+        await user.save();
+        res.json({
+            ok: true,
+            message: "Staff deactivated successfully"
+        });
+    }
 });
 
 // Get users by role

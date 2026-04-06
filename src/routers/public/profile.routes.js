@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
     getMe,
     updateMe,
+    updateEmail,
     getOrderHistory,
     getActiveOrders,
     getOrderTracking,
@@ -12,6 +13,8 @@ import {
     getUserStats
 } from "../../controllers/profile.controller.js";
 import { requireAuth } from "../../middleware/auth.middleware.js";
+import { validate } from "../../middleware/validation.middleware.js";
+import { updateEmailValidator } from "../../validators/profile.validator.js";
 
 const router = Router();
 
@@ -21,6 +24,7 @@ router.use(requireAuth);
 // Profile
 router.get("/me", getMe);
 router.patch("/me", updateMe);
+router.patch("/email", updateEmailValidator, validate, updateEmail);
 router.get("/stats", getUserStats);
 
 // Orders

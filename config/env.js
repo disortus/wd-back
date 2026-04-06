@@ -30,4 +30,9 @@ export const ORIGINAL_SUPPORT_FULLNAME = process.env.ORIGINAL_SUPPORT_FULLNAME;
 export const ORIGINAL_SUPPORT_PHONE = process.env.ORIGINAL_SUPPORT_PHONE;
 export const ORIGINAL_SUPPORT_PASSWORD = process.env.ORIGINAL_SUPPORT_PASSWORD;
 
+// Default staff - Developer
+export const ORIGINAL_DEVELOPER_FULLNAME = process.env.ORIGINAL_DEVELOPER_FULLNAME;
+export const ORIGINAL_DEVELOPER_PHONE = process.env.ORIGINAL_DEVELOPER_PHONE;
+export const ORIGINAL_DEVELOPER_PASSWORD = process.env.ORIGINAL_DEVELOPER_PASSWORD;
+
 // TODO: integrate envalide and validate env varialbles

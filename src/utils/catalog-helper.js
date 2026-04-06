@@ -24,4 +24,4 @@ export const validateProductAttributes = asyncHandler(async (subcategorySlug, at
             throw new AppError(400, `invalid attribute: ${key}`);
         }
     }
-})
+});

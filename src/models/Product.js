@@ -1,6 +1,27 @@
 import mongoose from "mongoose";
 import { CATEGORY_TYPES_LIST, DB_MODELS, SUBCATEGORY_TYPES_LIST } from "../utils/enums.js";
 
+const productAttributeSchema = new mongoose.Schema({
+    key: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    label: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    value: {
+        type: mongoose.Schema.Types.Mixed,
+        required: true
+    },
+    unit: {
+        type: String,
+        default: null
+    }
+}, { _id: false });
+
 const productShema = new mongoose.Schema({
     title: {
         type: String,
@@ -31,9 +52,8 @@ const productShema = new mongoose.Schema({
     },
 
     attributes: {
-        type: Map,
-        of: mongoose.Schema.Types.Mixed,
-        default: {}
+        type: [productAttributeSchema],
+        default: []
     },
 
     description: {
@@ -69,15 +89,24 @@ const productShema = new mongoose.Schema({
         default: ""
     },
 
-    specs: {
-        type: Object
-    },
-
     isActive: {
         type: Boolean,
         default: true
     }
 }, { timestamps: true });
+
+productShema.pre("save", function() {
+    const uniqueImages = [...new Set((this.images || []).filter(Boolean))];
+    this.images = uniqueImages;
+
+    if (!this.mainImage && uniqueImages.length > 0) {
+        this.mainImage = uniqueImages[0];
+    }
+
+    if (this.mainImage && !uniqueImages.includes(this.mainImage)) {
+        this.images = [this.mainImage, ...uniqueImages];
+    }
+});
 
 productShema.index({ categorySlug: 1, subcategorySlug: 1 });
 productShema.index({ title: "text", description: "text" });

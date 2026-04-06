@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 import { DB_MODELS, ORDER_STATUS_TYPES_LIST, ORDER_STATUS_TYPES } from "../utils/enums.js";
 
+const orderStaffSnapshotSchema = new mongoose.Schema({
+    fullname: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    email: { type: String, default: "" }
+}, { _id: false });
+
 const orderItemAttributesSchema = new mongoose.Schema({
     key: { 
         type: String, 
@@ -83,7 +89,8 @@ const orderSchema = new mongoose.Schema({
 
     userSnapshot: {
         fullname: { type: String, required: true },
-        phone: { type: String, required: true }
+        phone: { type: String, required: true },
+        email: { type: String, default: "" }
     },
 
     items: {
@@ -99,10 +106,11 @@ const orderSchema = new mongoose.Schema({
     },
 
     deliveryAddress: {
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        postalCode: { type: String, required: true },
-        country: { type: String, required: true }
+        address: { type: String, required: true },
+        entrance: { type: String, default: "" },
+        apartment: { type: String, default: "" },
+        city: { type: String, default: "Astana" },
+        instructions: { type: String, default: "" }
     },
 
     recipientName: {
@@ -135,9 +143,66 @@ const orderSchema = new mongoose.Schema({
         default: null
     },
 
+    moderatorSnapshot: {
+        type: orderStaffSnapshotSchema,
+        default: () => ({})
+    },
+
+    acceptedByModeratorAt: {
+        type: Date,
+        default: null
+    },
+
+    packedAt: {
+        type: Date,
+        default: null
+    },
+
+    packedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: DB_MODELS.USER,
+        default: null
+    },
+
+    packedBySnapshot: {
+        type: orderStaffSnapshotSchema,
+        default: () => ({})
+    },
+
+    assignedByModerator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: DB_MODELS.USER,
+        default: null
+    },
+
+    assignedByModeratorSnapshot: {
+        type: orderStaffSnapshotSchema,
+        default: () => ({})
+    },
+
     courier: {
         type: mongoose.Schema.Types.ObjectId,
         ref: DB_MODELS.USER,
+        default: null
+    },
+
+    courierSnapshot: {
+        type: orderStaffSnapshotSchema,
+        default: () => ({})
+    },
+
+    assignedToCourierAt: {
+        type: Date,
+        default: null
+    },
+
+    courierAcceptedAt: {
+        type: Date,
+        default: null
+    },
+
+    deliveryStartedAt: {
+        type: Date,
         default: null
     },
 
@@ -149,6 +214,17 @@ const orderSchema = new mongoose.Schema({
     deliveredAt: {
         type: Date,
         default: null
+    },
+
+    deliveredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: DB_MODELS.USER,
+        default: null
+    },
+
+    deliveredBySnapshot: {
+        type: orderStaffSnapshotSchema,
+        default: () => ({})
     },
 
     canceledAt: {
@@ -178,16 +254,22 @@ orderSchema.pre("validate", async function() {
 // Update status history on status change
 orderSchema.pre("save", function() {
     if (this.isNew) {
-        this.statusHistory.push({
-            status: this.status,
-            changedAt: new Date()
-        });
+        if (this.statusHistory.length === 0) {
+            this.statusHistory.push({
+                status: this.status,
+                changedAt: new Date()
+            });
+        }
     }
     else if (this.isModified("status")) {
-        this.statusHistory.push({
-            status: this.status,
-            changedAt: new Date()
-        });
+        const lastStatus = this.statusHistory[this.statusHistory.length - 1];
+
+        if (!lastStatus || lastStatus.status !== this.status) {
+            this.statusHistory.push({
+                status: this.status,
+                changedAt: new Date()
+            });
+        }
     }
 });
 

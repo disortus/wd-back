@@ -8,6 +8,7 @@ import router from "./routers/index.routes.js";
 import { swaggerSpec } from "../docs/swagger.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 import { globalRateLimit } from "./middleware/rate-limit.middleware.js";
+import { requestLogger } from "./middleware/logging.middleware.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
@@ -67,6 +68,9 @@ app.use(globalRateLimit);
 
 // Also log to console in development
 app.use(morgan("dev"));
+
+// Request logging to database
+app.use(requestLogger);
 
 // Response compression
 app.use(compression());

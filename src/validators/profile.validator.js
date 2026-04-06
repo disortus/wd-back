@@ -3,11 +3,24 @@ import { body } from "express-validator";
 export const updateProfileValidator = [
     body("fullname")
         .optional()
-        .isLength({ min: 2 }).withMessage(" name too short"),
+        .trim()
+        .isLength({ min: 2, max: 100 }).withMessage("Имя должно содержать от 2 до 100 символов"),
+
+    body("email")
+        .optional()
+        .trim()
+        .isEmail().withMessage("Некорректный формат email")
+        .normalizeEmail(),
 
     body("phone")
         .optional()
-        .isMobilePhone("kk-KZ")
+        .trim()
+        .isMobilePhone("kk-KZ").withMessage("Некорректный формат телефона")
 ];
 
-// TODO: add feature validator for new functions
+export const updateEmailValidator = [
+    body("email")
+        .trim()
+        .isEmail().withMessage("Некорректный формат email")
+        .normalizeEmail()
+];

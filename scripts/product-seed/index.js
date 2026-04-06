@@ -985,7 +985,8 @@ async function runSeed() {
     for (const [cat, subs] of Object.entries({
       electronics: ["smartphones", "laptops", "tablets", "smart_watches", "headphones", "desktops"],
       accessories: ["chargers", "cables", "cases", "adapters", "keyboards", "mice", "apple_pencil", "hubs_docks"],
-      desktops_monitors: ["desktops", "monitors"]
+      desktops_monitors: ["desktops", "monitors"],
+      tv_home: ["streaming_devices", "smart_home"]
     })) {
       if (subs.includes(subcategorySlug)) {
         categorySlug = cat;

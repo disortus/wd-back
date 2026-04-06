@@ -83,7 +83,6 @@ const cartSchema = new mongoose.Schema({
 
 // Update totals before saving
 cartSchema.pre("save", function() {
-
     this.totalItems = this.items.reduce(
         (sum, item) => sum + item.quantity,
         0
@@ -93,7 +92,6 @@ cartSchema.pre("save", function() {
         (sum, item) => sum + item.priceSnapshot * item.quantity,
         0
     );
-
 });
 
 // Method to recalculate cart totals

@@ -21,6 +21,7 @@ export const updateMe = asyncHandler(async (req, res) => {
     const allowedFields = [
         "fullname",
         "phone",
+        "email",
         "profile",
         "addresses",
         "notifications"
@@ -41,6 +42,40 @@ export const updateMe = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.auth.id,
         updates,
+        { new: true, runValidators: true }
+    );
+
+    if (!user) {
+        throw new AppError(404, "User not found");
+    }
+
+    res.json({
+        ok: true,
+        data: user.getFullProfile()
+    });
+});
+
+// Update email only
+export const updateEmail = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        throw new AppError(400, "Email is required");
+    }
+
+    // Check if email is already taken by another user
+    const existingUser = await User.findOne({ 
+        email: email.toLowerCase(),
+        _id: { $ne: req.auth.id }
+    });
+
+    if (existingUser) {
+        throw new AppError(400, "Email already in use");
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.auth.id,
+        { email: email.toLowerCase() },
         { new: true, runValidators: true }
     );
 

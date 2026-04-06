@@ -6,6 +6,7 @@ import publicRouter from "./public/index.routes.js";
 import moderatorRouter from "./moderator/index.routes.js";
 import courierRouter from "./courier/index.routes.js";
 import supportRouter from "./support/index.routes.js";
+import developerRouter from "./developer/index.routes.js";
 
 const router = Router();
 
@@ -39,6 +40,9 @@ router.use("/courier", courierRouter);
 
 // Support routes
 router.use("/support", supportRouter);
+
+// Developer routes
+router.use("/developer", developerRouter);
 
 // Health routes
 router.use("/health", healthRouter);
