@@ -55,10 +55,10 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-    const { phone: rawPhone, password } = req.body;
+    const { phone, password } = req.body;
 
-    // Normalize phone: trim whitespace and ensure consistent format
-    const phone = rawPhone ? rawPhone.trim().replace(/\s+/g, "") : rawPhone;
+    // // Normalize phone: trim whitespace and ensure consistent format
+    // const phone = rawPhone ? rawPhone.trim().replace(/\s+/g, "") : rawPhone;
 
     const user = await User.findOne({ phone });
 

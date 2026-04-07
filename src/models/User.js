@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema({
 
     email: {
         type: String,
-        default: null,
+        default: "",
         trim: true,
         lowercase: true
     },
@@ -171,6 +171,7 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
 userSchema.index({ "stats.totalSpent": -1 });
+// Note: email is not indexed as unique - users register by phone, not email
 
 // Virtual for getting default address
 userSchema.virtual("defaultAddress").get(function() {
@@ -179,8 +180,9 @@ userSchema.virtual("defaultAddress").get(function() {
 
 userSchema.pre("save", async function() {
     if (typeof this.email === "string") {
+        // Normalize email - keep empty string if no email provided
         const normalizedEmail = this.email.trim().toLowerCase();
-        this.email = normalizedEmail || null;
+        this.email = normalizedEmail || "";
     }
 
     if (Array.isArray(this.addresses) && this.addresses.length > 0) {
