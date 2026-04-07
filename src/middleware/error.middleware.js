@@ -59,9 +59,10 @@ export function errorHandler(err, req, res, next) {
     }
 
     if (err.code === 11000) {
+        const fieldName = Object.keys(err.keyValue || {})[0] || "field";
         return res.status(409).json({
             success: false,
-            message: "Duplicate value",
+            message: `${fieldName} already exists`,
             details: err.keyValue
         });
     }

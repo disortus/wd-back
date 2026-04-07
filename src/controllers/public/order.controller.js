@@ -60,10 +60,11 @@ export const createOrder = asyncHandler(async (req, res) => {
         items: orderItems,
         totalPrice,
         deliveryAddress: {
-            street: deliveryAddress.street || deliveryAddress,
-            city: deliveryAddress.city || "",
-            postalCode: deliveryAddress.postalCode || "",
-            country: deliveryAddress.country || ""
+            address: deliveryAddress.address || deliveryAddress.street || deliveryAddress,
+            entrance: deliveryAddress.entrance || "",
+            apartment: deliveryAddress.apartment || "",
+            city: deliveryAddress.city || "Astana",
+            instructions: deliveryAddress.instructions || ""
         },
         recipientName,
         recipientPhone,
