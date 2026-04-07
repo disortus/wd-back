@@ -6,7 +6,10 @@ import { AppError } from "../utils/app-errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const register = asyncHandler(async (req, res) => {
-    const { fullname, phone, password } = req.body;
+    const { fullname, phone: rawPhone, password } = req.body;
+
+    // Normalize phone: trim whitespace and ensure consistent format
+    const phone = rawPhone ? rawPhone.trim().replace(/\s+/g, "") : rawPhone;
 
     const exists = await User.findOne({ phone });
 
@@ -52,7 +55,10 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-    const { phone, password } = req.body;
+    const { phone: rawPhone, password } = req.body;
+
+    // Normalize phone: trim whitespace and ensure consistent format
+    const phone = rawPhone ? rawPhone.trim().replace(/\s+/g, "") : rawPhone;
 
     const user = await User.findOne({ phone });
 

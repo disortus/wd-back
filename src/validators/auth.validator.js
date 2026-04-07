@@ -6,6 +6,7 @@ export const registerValidator = [
         .isLength({ min:2 }).withMessage("name must be 2 cgaracters at least"),
 
     body("phone")
+        .trim()
         .isMobilePhone("kk-KZ").withMessage("invalid phone number format"),
     
     body("password")
@@ -19,6 +20,7 @@ export const registerValidator = [
 
 export const loginValidator = [
     body("phone")
+        .trim()
         .isMobilePhone("kk-KZ").withMessage("invalid phone number format"),
     
     body("password")
